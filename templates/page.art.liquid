@@ -1,0 +1,31 @@
+<div class="row Humanist521BT-Light center-section mx-auto px-0">
+  <div id="content-wrapper">
+    <a href="javascript&colon;history.go(-1)" class="back-btn"> BACK </a>
+    {% for collection in collections %}
+   
+      {% if collection.handle == 'print' or collection.handle == 'limited-edition' %}
+
+			
+        <div class="box-art box col-md-12 px-0 lg background border-bt-2" style="background: url({{ collection.image.src | collection_img_url: 'original' }}) no-repeat center center; background-size: cover;"> 
+			
+          		
+            	<a href="{{collection.handle }}">
+          
+          
+
+
+            <div class="border-white">&nbsp;</div>
+            <div class="overlay" style="background-color: rgba(0, 0, 0, 0.6); margin-top: -24px !important;">
+              <div class="content-a">
+                <div class="content-b Humanist521BT-Light">{{ collection.title }}</div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+      {% endif %}
+   
+    
+    {% endfor %}
+  </div>
+</div>

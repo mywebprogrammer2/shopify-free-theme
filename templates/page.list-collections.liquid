@@ -1,0 +1,94 @@
+<!-- /templates/collection.list.liquid -->
+{% comment %}
+
+  By using a variation of the 'view all' parameter technique, you can create
+  a custom layout for any template by adding ?view=xxxx
+
+  In this example, you can have a list view of your collection page by going to
+  /collections/all?view=list
+
+  For more information on collection tags:
+    - http://docs.shopify.com/themes/liquid-variables/collection
+
+  For more information on the ?view parameter:
+    - http://docs.shopify.com/support/configuration/store-customization/can-i-show-more-than-50-products-on-my-homepage-can-i-add-a-view-all-function-to-my-collection-pages#add-view-all
+
+{% endcomment %}
+<div class="row Humanist521BT-Light center-section mx-auto px-0">
+  <div id="content-wrapper">
+   <a href="javascript&colon;history.go(-1)" class="back-btn"> BACK </a>
+  <!-- Cart button -->
+   <!-- <a href="/cart" class="text-decoration-none text-cart" style="position:absolute; z-index: 1; top:60px; left:15px ;">
+    <i class="fa fa-shopping-cart fa-2x" aria-hidden="true" style="color: #ffffff;"></i> 
+    <span class="cartCount">{{cart.item_count > 0 ? cart.item_count : 0 }}</span> 
+  </a> -->
+  
+   {%comment%}
+    {% for collection in collections %}
+    	{% if collection.title == 'ART' or collection.title == 'GEAR' or collection.title == 'PARTS' or collection.title == 'LEATHER GOODS' or collection.title == 'THE WATCH'%}
+          <div class="box-art box col-md-12 px-0 lg background border-bt-2" style="height:24.25% !important; background: url({{ collection.image.src | collection_img_url: 'original' }}) no-repeat center center; background-size: cover;"> 
+              {% if collection.title == "THE WATCH" %}
+                <a href="https://icon4x4.com/watches">
+                  {% elsif collection.title == "LEATHER GOODS" %}
+                  <a href="https://jwcollective.com">
+                  {% else %}
+                  <a href="{{ collection.title }}">
+              {% endif %}
+
+                <div class="border-white">&nbsp;</div>
+                <div class="overlay" style="background-color: rgba(0, 0, 0, 0.6); margin-top: -24px !important;">
+                  <div class="content-a">
+                    <div class="content-b Humanist521BT-Light">{{ collection.title }}</div>
+                  </div>
+                </div>
+              </a>
+           </div>		
+    
+    
+            {%else%}
+            	{%continue%} 
+    	{% endif%}
+      
+    {% endfor %}
+    {%endcomment%}
+
+    {% for link in linklists[page.handle].links %}
+      <!-- <div class="px-0 collection-box col-md-3 col-xs-12  background" id="bkg_image" style="
+                float: left; background: url({{ link.object.image.src | collection_img_url: 'original' }}); background-size: cover;" data-img-width="1600" data-img-height="1064" title="{{ link.title }}">
+        <div class="overlay" style="background-color: rgba(0, 0, 0, 0.6);">
+          <a href="{{ link.url }}">
+            <div class="border-white"></div>
+            <div class="content-a">
+              <div class="content-b text-uppercase">
+                {{ link.title }}
+              </div>
+
+            </div>
+          </a>
+        </div>
+    </div> -->
+    <div class="box-art box col-md-12 px-0 lg background border-bt-2" style="height:24% !important; background:  url({{ link.object.image.src | collection_img_url: 'original' }}) no-repeat center center; background-size: cover;"> 
+      {% if link.title == "The Watch" %}
+        <a href="/pages/watches">
+          {%comment%}
+          {% elsif link.title == 'Art' or link.title == 'Gear' or link.title == 'Parts' or link.title == 'Leather Goods' %}
+              <a href="{{ link.title | replace: ' ', '-' | downcase  }}">
+          {% else %}
+              <a href="{{ link.url }}">
+          {%endcomment%}
+          {% else %}
+              <a href="{{ link.title | replace: ' ', '-' | downcase  }}">
+          
+      {% endif %}
+
+        <div class="border-white">&nbsp;</div>
+        <div class="overlay" style="background-color: rgba(0, 0, 0, 0.6); margin-top: -24px !important;">
+          <div class="content-a">
+            <div class="content-b Humanist521BT-Light">{{ link.title }}</div>
+          </div>
+        </div>
+      </a>
+   </div>	
+  {% endfor %}
+  </div>
+</div>

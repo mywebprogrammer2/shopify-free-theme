@@ -1,0 +1,714 @@
+<!doctype html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if IE 9 ]><html class="ie9 no-js"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html class="no-js">
+<!--<![endif]-->
+
+<head>
+  
+  <meta name="facebook-domain-verification" content="jpw9rk1lkwbx3mkjaa422kaamxbejl" />
+
+
+  <!-- Basic page needs ================================================== -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  {% if settings.favicon_enable %}
+  <!-- <link rel="shortcut icon" href="{{ 'favicon.png' | asset_url }}" type="image/png" /> -->
+  <link rel="shortcut icon" href="https://cdn.shopify.com/s/files/1/0578/9807/4296/files/favicon.png?v=1625137902"
+    type="image/png" />
+  {% endif %}
+  
+  <!-- Title and description ================================================== -->
+  <title>
+    {{ page_title }}{% if current_tags %}{% assign meta_tags = current_tags | join: ', ' %} &ndash; {{
+    'general.meta.tags' | t: tags: meta_tags }}{% endif %}{% if current_page != 1 %} &ndash; {{ 'general.meta.page' | t:
+    page: current_page }}{% endif %}{% unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless %}
+  </title>
+
+  {% if page_description %}
+  <meta name="description" content="{{ page_description | escape }}">
+  {% endif %}
+
+  <!-- Helpers ================================================== -->
+  {% include 'social-meta-tags' %}
+  <link rel="canonical" href="{{ canonical_url }}">
+  <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+  <meta name="theme-color" content="{{ settings.color_primary }}">
+
+  <!-- CSS ================================================== -->
+  {{ 'timber.scss.css' | asset_url | stylesheet_tag }}
+  {{ 'flexslider.css' | asset_url | stylesheet_tag }}
+
+  <!-- Header hook for plugins ================================================== -->
+  {{ content_for_header }}
+  {% include 'oldIE-js' %}
+
+  {{ '//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js' | script_tag }}
+  {{ 'modernizr.min.js' | asset_url | script_tag }}
+
+  {% comment %}
+  If you store has customer accounts disabled, you can remove the following JS file
+  {% endcomment %}
+  {% if template contains 'customers' %}
+  {{ 'shopify_common.js' | shopify_asset_url | script_tag }}
+  {% endif %}
+
+  {%comment%}
+  Custom Bootstrap
+  {% endcomment %}
+  {{ '//stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css'| stylesheet_tag }}
+  {{ '//stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js' | script_tag }}
+  {{ '//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css' | stylesheet_tag }}
+
+  {% if template contains 'product' %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js" integrity="sha512-IsNh5E3eYy3tr/JiX2Yx4vsCujtkhwl7SLqgnwLNgf04Hrt9BT9SXlLlZlWx+OK4ndzAoALhsMNcCmkggjZB1w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.css" integrity="sha512-WEQNv9d3+sqyHjrqUZobDhFARZDko2wpWdfcpv44lsypsSuMO0kHGd3MQ8rrsBn/Qa39VojphdU6CMkpJUmDVw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  {% endif %}
+</head>
+
+{% comment %}
+Add the page template as a class for easy page or template specific styling.
+{% endcomment %}
+
+<body id="{{ page_title | handle }}" style="overflow:hidden;"
+  class="{% if customer %}customer-logged-in {% endif %}template-{{ template | replace: '.', ' ' | truncatewords: 1, '' | handle }}">
+
+  <div id="NavDrawer" class="drawer drawer--left">
+    <div class="drawer__header">
+      <div class="drawer__title h3">{{ 'layout.drawers.browse' | t }}</div>
+      <div class="drawer__close js-drawer-close">
+        <button type="button" class="icon-fallback-text">
+          <span class="icon icon-x" aria-hidden="true"></span>
+          <span class="fallback-text">{{ 'layout.drawers.close_menu' | t }}</span>
+        </button>
+      </div>
+    </div>
+    <!-- begin mobile-nav -->
+    <ul class="mobile-nav">
+      {%comment%}
+      <li class="mobile-nav__item mobile-nav__search">
+        {% include 'search-bar' %}
+      </li>
+      {%endcomment%}
+      {% for link in linklists.main-menu.links %}
+      {% comment %}
+      Create a dropdown menu by naming a linklist the same as a link in the parent nav
+
+      More info on dropdowns:
+      - http://docs.shopify.com/manual/your-website/navigation/create-drop-down-menu
+      {% endcomment %}
+      {% assign child_list_handle = link.title | handleize %}
+      {% if linklists[child_list_handle].links != blank %}
+      <li class="mobile-nav__item{% if link.active %} mobile-nav__item--active{% endif %}" aria-haspopup="true">
+        <div class="mobile-nav__has-sublist">
+          <a href="{{ link.url }}" class="mobile-nav__link">{{ link.title }}</a>
+          <div class="mobile-nav__toggle">
+            <button type="button" class="icon-fallback-text mobile-nav__toggle-open">
+              <span class="icon icon-plus" aria-hidden="true"></span>
+              <span class="fallback-text">See More</span>
+            </button>
+            <button type="button" class="icon-fallback-text mobile-nav__toggle-close">
+              <span class="icon icon-minus" aria-hidden="true"></span>
+              <span class="fallback-text">{{ 'cart.general.close_cart' | t | json }}</span>
+            </button>
+          </div>
+        </div>
+        <ul class="mobile-nav__sublist">
+          {% for childlink in linklists[child_list_handle].links %}
+          <li class="mobile-nav__item {% if childlink.active %} mobile-nav__item--active{% endif %}">
+            <a href="{{ childlink.url }}" class="mobile-nav__link">{{ childlink.title | escape }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+      </li>
+      {% else %}
+      <li class="mobile-nav__item{% if link.active %} mobile-nav__item--active{% endif %}">
+        <a href="{{ link.url }}" class="mobile-nav__link">{{ link.title }}</a>
+      </li>
+      {% endif %}
+      {% endfor %}
+
+      {% comment %}
+      If customer accounts are enabled, provide login and create account links
+      {% endcomment %}
+      {% if shop.customer_accounts_enabled %}
+      {% if customer %}
+      <li class="mobile-nav__item">
+        {% if customer.first_name != blank %}
+        {% capture first_name %}{{ customer.first_name }}{% endcapture %}
+        <a href="/account">{{ 'layout.customer.logged_in_as_html' | t: first_name: first_name }}</a>
+        {% else %}
+        <a href="/account">{{ 'layout.customer.account' | t }}</a>
+        {% endif %}
+      </li>
+      <li class="mobile-nav__item">
+        {{ 'layout.customer.log_out' | t | customer_logout_link }}
+      </li>
+      {% else %}
+      <li class="mobile-nav__item">
+        {{ 'layout.customer.log_in' | t | customer_login_link }}
+      </li>
+      <li class="mobile-nav__item">
+        {{ 'layout.customer.create_account' | t | customer_register_link }}
+      </li>
+      {% endif %}
+      {% endif %}
+    </ul>
+    <!-- //mobile-nav -->
+
+
+  </div>
+  {% if settings.ajax_cart_method == "drawer" %}
+  <div id="CartDrawer" class="drawer drawer--right">
+    <div class="drawer__header">
+      <div class="drawer__title h3">{{ 'cart.general.title' | t }}</div>
+      <div class="drawer__close js-drawer-close">
+        <button type="button" class="icon-fallback-text">
+          <span class="icon icon-x" aria-hidden="true"></span>
+          <span class="fallback-text">{{ 'cart.general.close_cart' | t | json }}</span>
+        </button>
+      </div>
+    </div>
+    <div id="CartContainer"></div>
+  </div>
+  {% endif %}
+
+
+  <div id="PageContainer" class="is-moved-by-drawer">
+    <header class="site-header" role="banner">
+      <div class="col-lg-12 col-sm-12 col-md-12 px-0">
+        <div class="row">
+            <div class="col-12 col-sm-9 col-lg-9 col-md-9 ">
+              <div id="logo_0" class="padding-a-half text-center text-md-left ml-md-5">
+                <a href="https://www.icon4x4.com">
+                  <img src="{{ 'logo.png' | asset_url }}" alt="{{ shop.name }}" itemprop="logo">
+                </a>
+                <div class="humanist-font tagline text-dark col-sm-6 col-12 text-center text-md-left">
+                  HAND MADE IN LOS ANGELES, CALIFORNIA
+                </div>
+              </div>
+              <!-- Cart Icon -->
+              <div class="p-2 cartIcon">
+                <a href="/cart" class="text-decoration-none ">
+                  <i class="fa fa-shopping-cart fa-2x" aria-hidden="true" style="color: #9e9e9e;"></i> 
+                  <span class="cartCount">{{cart.item_count > 0 ? cart.item_count : 0 }}</span> 
+                </a>
+              </div>
+
+            </div>
+            <div class="col-sm-3 col-lg-3 title-section-wrap">
+              <div class="olive-color padding-hack w-100" style="max-height: 84px !important;">
+                <h1 style="font-size: 25px;line-height: 27px !important;"
+                  class="text-center padding-a-top front humanist-font text-white ">
+                  {% if page_title == "Icon4x4" %}
+                    SHOP
+                  {% else %}
+                      {%if page_title contains 'Shop'%}
+                        SHOP
+                      {%else%}
+                        {{ page_title}}
+                      {%endif%}
+                  {% endif %}
+                </h1>
+              </div>
+            </div>
+        </div>
+        <!-- <div class="grid--full grid--table">
+          <div class="grid__item large--one-whole p-lg-3 py-lg-4">
+            {% comment %}
+            Use the uploaded logo from theme settings if enabled.
+            Site name gets precedence with H1 tag on homepage, div on other pages.
+            {% endcomment %}
+            {% if template == 'index' %}
+            <h1 class="site-header__logo large--left d-sm-block d-lg-flex mt-3 mt-lg-0 ml-lg-5" itemscope
+              itemtype="http://schema.org/Organization">
+              {% else %}
+              <div class="h1 site-header__logo large--left" itemscope itemtype="http://schema.org/Organization">
+                {% endif %}
+                {% if settings.logo_use_image %}
+                <a href="/" itemprop="url" class=" mb-n4">
+                  <img src="{{ 'logo.png' | asset_url }}" alt="{{ shop.name }}" itemprop="logo">
+                </a>
+                <div class="humanist-font tagline">
+                  HAND MADE IN LOS ANGELES, CALIFORNIA
+                </div>
+                {% else %}
+                <a href="/" itemprop="url">{{ shop.name }}</a>
+                {% endif %}
+                {% if template == 'index' %}
+            </h1>
+            {% else %}
+          </div>
+          {% endif %}
+        </div> -->
+        <!-- <div class="grid__item large--one-third large--text-right medium-down--hide shop-bg"> -->
+        {% comment %}
+        Show number of items in the cart and total cost in the /cart link
+
+        Ajax Cart Notes:
+        - #cartCount updates the total number of items in the cart
+        - #cartCost updates the total cost of the cart
+        - Documentation: http://shopify.com/timber#ajax-cart
+        {% endcomment %}
+        <!-- <div class="shop-section">
+            SHOP
+          </div> -->
+
+        {% comment %}
+        If customer accounts are enabled, provide login and create account links
+        {% endcomment %}
+        <!-- {% if shop.customer_accounts_enabled %}
+          <div>
+            {% if customer %}
+            {% if customer.first_name != blank %}
+            {% capture first_name %}<a href="/account">{{ customer.first_name }}</a>{% endcapture %}
+            {{ 'layout.customer.logged_in_as_html' | t: first_name: first_name }}
+            {% else %}
+            <a href="/account">{{ 'layout.customer.account' | t }}</a>
+            {% endif %}
+            | {{ 'layout.customer.log_out' | t | customer_logout_link }}
+            {% else %}
+            {{ 'layout.customer.log_in' | t | customer_login_link }}
+            | {{ 'layout.customer.create_account' | t | customer_register_link }}
+            {% endif %}
+          </div>
+          {% endif %} -->
+
+
+        <!-- </div> -->
+      </div>
+
+  </div>
+  </header>
+
+  <nav class="nav-bar" role="navigation" style="max-height: 25px !important;">
+    <div class="col-12 px-0">
+      <div class="medium-down--hide">
+        {% comment %}
+        List out your main-menu linklist (default)
+
+        More info on linklists:
+        - http://docs.shopify.com/themes/liquid-variables/linklists
+        {% endcomment %}
+        <!-- begin site-nav -->
+        <ul class="site-nav ml-0" id="AccessibleNav">
+          <div class="row col-12 px-0 mx-auto">
+            {% for link in linklists.main-menu.links %}
+            {% comment %}
+            Create a dropdown menu by naming a linklist the same as a link in the parent nav
+
+            More info on dropdowns:
+            - http://docs.shopify.com/manual/your-website/navigation/create-drop-down-menu
+            {% endcomment %}
+            {% if forloop.last %}
+            {% assign isLast = 1 %}
+            {% endif %}
+            {% assign child_list_handle = link.title | handleize %}
+            {% if linklists[child_list_handle].links != blank %}
+            <li
+              class="{% if link.active %}{% endif %} {% if link.title == 'Models' %} has_models {% else %} has_child{% endif %}   col text-center font-humanist {% if isLast %} {%else%}  nav-border {% endif %} bg-nav px-0"
+              aria-haspopup="true" style="max-height: 25px !important; z-index:999;">
+              <a href="{{ link.url }}" class="site-nav__link custom-nav-a">
+                {{ link.title | upcase}}
+                <!-- <span class="icon icon-arrow-down" aria-hidden="true"></span> -->
+              </a>
+
+              <div class="row hidden-xs" id="nav-child" style="width: 200.5% !important;margin-left: 0px !important;">
+                <ul class="d-flex dropdown-menu-container-invent"
+                  style="width: 100%; float: right; right: 0px; display: block;">
+                  {% for childlink in linklists[child_list_handle].links %}
+                  {% if childlink.title contains 'Available' %}
+                  <li
+                    class='{% if  childlink.title == "Available Projects" %}invent-projects first {% else %} invent-now last {% endif %} px-0 {% if childlink.title contains "Available" %}dd-li {% else %} dd-l {% endif %}'
+                    data-img-width="300" data-img-height="150" style="z-index: 999; width: 50%; margin-top:-1px; ">
+                    <a href="{{ childlink.url }}">
+                      <div class="overlay" style="background-color: rgb(0, 0, 0, 0.6)">
+                        <div class="content-a">
+                          <div class="content-b" style="font-size: 13px !important;">{{ childlink.title | escape |
+                            upcase }}</div>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              </div>
+
+              <!-- <ul class="site-nav__dropdown">
+                {% for childlink in linklists[child_list_handle].links %}
+                <li{% if childlink.active %} class="site-nav--active" {% endif %}>
+                  <a href="{{ childlink.url }}" class="site-nav__link custom-nav-a">{{ childlink.title | escape | upcase}}</a>
+            </li>
+            {% endfor %}
+
+        </ul> -->
+            </li>
+            {% else %}
+
+            <li class="col text-center font-humanist {% if isLast %} {%else%}  nav-border {% endif %} bg-nav px-0"
+              style="z-index:999;max-height: 25px !important;">
+              <a href="{{ link.url }}"
+                class="site-nav__link custom-nav-a {% if link.title == 'Shoes' %} pl-2px  {% endif %} ">{{ link.title |
+                upcase }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+          </div>
+        </ul>
+
+
+        <!-- //site-nav -->
+      </div>
+      <!-- MOBILE NAVBAR DEFAULT -->
+      <!-- <div class="large--hide medium-down--show">
+        <div class="grid">
+          <div class="grid__item ">
+            <div class="site-nav--mobile text-center">
+              <button type="button" class="icon-fallback-text site-nav__link js-drawer-open-left"
+                aria-controls="NavDrawer" aria-expanded="false">
+                <span class="icon icon-hamburger" aria-hidden="true"></span>
+                <span>Dropdown Menu</span>
+                
+              </button>
+            </div>
+          </div> -->
+          <!-- comment this code -->
+          <!-- <div class="grid__item one-half text-right">
+          <div class="site-nav--mobile">
+            <a href="/cart" class="js-drawer-open-right site-nav__link" aria-controls="CartDrawer"
+              aria-expanded="false">
+              <span class="icon-fallback-text">
+                <span class="icon icon-cart" aria-hidden="true"></span>
+                <span class="fallback-text">{{ 'layout.cart.title' | t }}</span>
+              </span>
+            </a>
+          </div>
+        </div>
+        </div>
+      </div> -->
+
+      <div class="large--hide medium-down--show">
+          <nav class="navbar navbar-default visible-xs-block" role="navigation" style='border-top: solid 1px #d99d9d;border-bottom: solid 1px #d99d9d;'>
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header responsive-menu ">
+    
+                    <a class="navbar-toggle Humanist521BT-Light collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" href="#" aria-expanded="false">DROPDOWN MENU</a>
+                </div>
+    
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="navbar-collapse Humanist521BT-Light collapse" id="bs-example-navbar-collapse-1" aria-expanded="false" style="height: 1px;">
+                
+                  
+                  <ul class="nav navbar-nav  pull-left w-100">
+                      <!-- Dynamic Menu for Mobile -->
+                      {% for link in linklists.main-menu.links %}
+                          <li class="{% if link.links != blank %}dropdown {% endif %} {% if link.active %} active {% if link.child_active %}child-active{% endif %} {%endif%}">
+                            <a href="{{ link.url }}" {% if link.links != blank %}class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" {% endif %}>{{ link.title | upcase }}</a>
+                          {% if link.links != blank %}
+                            <ul class="child dropdown-menu" role="menu" id="responsive-model">
+                              {% for child_link in link.links %}  
+                              <li {% if child_link.active %}class="active {% if child_link.child_active %}child-active{% endif %}"{% endif %}><a href= "{{ child_link.url }}">{{ child_link.title | upcase }}</a>
+                              
+                              </li>
+                              <li class="divider"></li>
+                              {% endfor %}
+                            </ul> 
+                          {% endif %} 
+                          </li>
+                      {% endfor %}
+
+                      <!-- Statick Menu Generated -->
+                        <!-- <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">MODELS <span class="caret"></span></a>
+                            <ul class="dropdown-menu " role="menu" id="responsive-model">
+                              
+                                <li title="ICON FJ"><a href="http://localhost/icon4x4/fj">ICON<sup>®</sup> FJ</a></li>
+                                <li class="divider"></li>
+                                <li title="ICON BR"><a href="http://localhost/icon4x4/br">ICON<sup>®</sup> BR</a></li>
+                                <li class="divider"></li>
+                                <li title="ICON TR"><a href="http://localhost/icon4x4/tr">ICON<sup>®</sup> TR</a></li>
+                              
+                                <li class="divider"></li>
+                                <li title="DERELICT"><a href="http://localhost/icon4x4/derelict">DERELICT<sup>®</sup></a></li>
+                                <li class="divider"></li>
+                                <li title="REFORMER"><a href="http://localhost/icon4x4/reformer">REFORMER<sup>®</sup></a></li>
+                                <li class="divider"></li>
+                                <li title="CONCEPTS"><a href="http://localhost/icon4x4/concepts">CONCEPTS</a></li>
+                                <li class="divider"></li>
+                                <li title="THE WATCH"><a href="http://localhost/icon4x4/watches">THE WATCH</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="http://localhost/icon4x4/about-icon">ABOUT</a></li>
+                        <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">INVENTORY <span class="caret"></span></a>
+                          <ul class="dropdown-menu " role="menu">
+                            <li><a href="http://localhost/icon4x4/inventory/now">AVAILABLE NOW</a></li>
+                            <li class="divider"></li>
+                            <li><a href="http://localhost/icon4x4/inventory/projects">AVAILABLE PROJECTS</a></li>
+                          </ul>
+                        </li>
+                        <li><a href="http://localhost/icon4x4/shop">SHOP</a></li> -->
+    
+                    </ul>
+    
+    
+                </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+        </nav>
+      </div>
+    </div>
+  </nav>
+
+  <div class="row">
+    {% for link in linklists.main-menu.links %}
+    {% assign child_list_handle = link.title | handleize %}
+    {% if linklists[child_list_handle].links != blank %}
+    <div class="row w-100" style="max-height: 0;">
+      <ul class="d-flex dropdown-menu-container-invent" style="width: 100%; float: right; right: 0px; display: block;">
+        {% for childlink in linklists[child_list_handle].links %}
+        {% if childlink.title contains 'Available' %}
+        {% else %}
+        <li
+          class='has_models invent-now last  px-0 dd-lt {% if childlink.title contains "FJ" %} icon-fj {% elsif childlink.title contains "BR" %} icon-br {% elsif childlink.title contains "TR" %} icon-tr {% elsif childlink.title contains "DERELICT" %} icon-derelicts {% elsif childlink.title contains "REFORMER" %} icon-reformers {% elsif childlink.title contains "CONCEPTS" %} icon-concepts {% else %} icon-watch {% endif %}'
+          data-img-width="300" data-img-height="150" style="z-index: 999; width: 50%; margin-top:-1px; ">
+          <a href="{{ childlink.url }}">
+            <div class="overlay" style="background-color: rgb(0, 0, 0, 0.6)">
+              <div class="content-a">
+                <div class="content-b Humanist521BT-Light" style="font-size: 13px !important;">
+                  {% assign titles = childlink.title | split: " " %}
+                  {% for title in titles %}
+
+                  <!-- {{ title | upcase }} -->
+                  {% if title == '®' %}
+                  <small class="li-txt-icon ">{{ title | upcase | escape }}</small>
+                  {% else %}
+                  {{ title | upcase | escape }}
+                  {% endif %}
+                  <!-- {{ new_title | escape | upcase }} -->
+                  {% endfor %}
+
+                  <!-- {{ childlink.title | escape | upcase }} -->
+                </div>
+              </div>
+            </div>
+          </a>
+        </li>
+        {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="row">
+    <div class="col-12 mx-auto px-0" role="main">
+      <!-- excluded clases from below: wrapper main-content-->
+      <main class=" w-100 px-0" role="main">
+  
+        {{ content_for_layout }}
+  
+      </main>
+    </div>
+  </div>
+
+  <!-- <footer class="sticky-footer d-block">
+    <div class="padding-a py-0 my-0 padding-fifteen d-flex justify-content-between">
+      <div class="col-sm-7 col-lg-7 col-md-7 px-0">
+        <ul class="Humanist521BT-Light pl-0 footer-menus ml-0 mb-0 pull-left col-sm-8 col-xs-7" type="none"
+          style="margin-top:-1px !important;max-height: 80px !important;">
+          <li class="first mb-0"><a href="https://www.icon4x4.com/contactus" class="footer-a">CONTACT US</a></li>
+          <li class="mb-0 mt-2px"><a class="footer-a" href="https://www.icon4x4.com/signup">JOIN OUR MAILING LIST</a>
+          </li>
+          <li class="mb-0 mt-2px"><a class="footer-a" href="http://icon4x4.com/brochures">DOWNLOAD BROCHURE</a></li>
+          <li class="last mb-0 mt-2px"><a class="footer-a" href="http://icon4x4.com/aboutus/press">PRESS</a></li>
+          <li class="mb-0 mt-2px" style="margin-bottom: 2px !important;"><a class="footer-a"
+              href="javascript:void(0)">ICON®, FJ40, FJ43, FJ44, FJ45, BR, TR, DERELICT &amp; REFORMER
+              ARE REGISTERED
+              TRADEMARKS AT THE U.S. PATENT &amp; TRADEMARK OFFICE.</a></li>
+        </ul>
+        <a href="https://www.icon4x4.com/" class="lizard">
+          <img src="https://cdn.shopify.com/s/files/1/0578/9807/4296/files/lizard.jpg?v=1624958443" alt="lizard"></a>
+      </div>
+      <div class="col-sm-5 col-lg-5 col-md-5 d-flex justify-content-end pr-0">
+        <ul type="none" class="d-flex justify-content-between" style="min-width: 223px;max-width: 223px;">
+          <li style="z-index: -9;">
+            <a class="py-0 facebook-icon" target="_blank" href="https://www.facebook.com/icon4x4"><i
+                class="social-icon rounded-circle fb fa fa-facebook"></i></a>
+          </li>
+          <li style="z-index: -9;">
+            <a class="py-0 twitter-icon" target="_blank" href="https://twitter.com/iconcustoms"><i
+                class=" social-icon rounded-circle twitter fa fa-twitter"></i></a>
+          </li>
+          <li style="z-index: -9;">
+            <a class="py-0 youtube-icon" target="_blank" href="http://www.youtube.com/user/ICON4x4Design"><i
+                class="social-icon rounded-circle yt fa fa-youtube"></i></a>
+          </li>
+          <li style="z-index: -9;">
+            <a class="py-0 pinterest-icon" target="_blank" href="https://pinterest.com/icon4x4/"><i
+                class="social-icon rounded-circle pi fa fa-pinterest"></i></a>
+          </li>
+          <li style="z-index: -9;"><a class="py-0 share-icon last " href="javascript:void(0)"> <i
+                class="social-icon rounded-circle fa fa-share-alt share"></i> </a>
+            <div class="sharethis-inline-share-buttons st-right st-has-labels  st-inline-share-buttons st-animated"
+              style="display: none;" id="st-1">
+              <div class="st-total ">
+                <span class="st-label">11</span>
+                <span class="st-shares">
+                  Shares
+                </span>
+              </div>
+              <div class="st-btn st-first st-last  st-remove-label" data-network="sharethis"
+                style="display: inline-block;">
+                <img alt="sharethis sharing button" src="https://platform-cdn.sharethis.com/img/sharethis.svg">
+                <span class="st-label">Share</span>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+    </div>
+    
+  </footer> -->
+
+ <footer class="sticky-footer d-block" style="background-color:#ffffff;">
+   <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-5 text-center">
+       
+        <ul type="none" class="d-flex justify-content-between p-1 px-4 float-md-right ml-5 ml-md-0" style="max-width:300px;">
+          <li class="list-padding-13">
+            <a class="py-0 facebook-icon" target="_blank" href="https://www.facebook.com/icon4x4"><i
+                class="social-icon rounded-circle fb fa fa-facebook"></i></a>
+          </li>
+          <li class="list-padding-13">
+            <a class="py-0 twitter-icon" target="_blank" href="https://twitter.com/iconcustoms"><i
+                class=" social-icon rounded-circle twitter fa fa-twitter"></i></a>
+          </li>
+          <li class="list-padding-13">
+            <a class="py-0 youtube-icon" target="_blank" href="http://www.youtube.com/user/ICON4x4Design"><i
+                class="social-icon rounded-circle yt fa fa-youtube"></i></a>
+          </li>
+          <li class="list-padding-13">
+            <a class="py-0 pinterest-icon" target="_blank" href="https://pinterest.com/icon4x4/"><i
+                class="social-icon rounded-circle pi fa fa-pinterest"></i></a>
+          </li>
+          <li class="list-padding-13"><a class="py-0 share-icon last " href="javascript:void(0)"> <i
+                class="social-icon rounded-circle fa fa-share-alt share"></i> </a>
+            <div class="sharethis-inline-share-buttons st-right st-has-labels  st-inline-share-buttons st-animated"
+              style="display: none;" id="st-1">
+              <div class="st-total ">
+                <span class="st-label">11</span>
+                <span class="st-shares">
+                  Shares
+                </span>
+              </div>
+              <div class="st-btn st-first st-last  st-remove-label" data-network="sharethis"
+                style="display: inline-block;">
+                <img alt="sharethis sharing button" src="https://platform-cdn.sharethis.com/img/sharethis.svg">
+                <span class="st-label">Share</span>
+              </div>
+            </div>
+          </li>
+        </ul>
+
+      </div>
+      <div class="col-sm-7 order-last order-sm-first">
+        <div class="row" style='background: #ffffff;'>
+          <div class="col-6 col-sm-6"> 
+            <ul class="list-unstyled footer-menus Humanist521BT-Light pull-left" style="float: none;">
+              <li class="my-0"> <a href="https://www.icon4x4.com/contactus">CONTACT US</a> </li>
+              <li class="my-0"> <a href="https://www.icon4x4.com/signup">JOIN OUR MAILING LIST</a></li>
+              <li class="my-0"> <a href="http://icon4x4.com/brochures">DOWNOAD BROCHURE</a></li>
+              <li class="my-0"> <a href="http://icon4x4.com/aboutus/press">PRESS</a></li>
+              <li class="my-0"> <a href="javascript:void(0)">ICON®, FJ40, FJ43, FJ44, FJ45, BR, TR, DERELICT & REFORMER ARE REGISTERED TRADEMARKS AT THE U.S. PATENT & TRADEMARK OFFICE.</a></li>
+            </ul>
+          </div>
+          <div class="col-6 col-sm-6 text-center">
+            <a href="https://www.icon4x4.com/" class="lizard">
+              <img class="img-fluid" src="https://cdn.shopify.com/s/files/1/0578/9807/4296/files/lizard.jpg?v=1624958443" alt="lizard">
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    
+  </footer>
+
+
+  {{ 'fastclick.min.js' | asset_url | script_tag }}
+  {{ 'timber.js' | asset_url | script_tag }}
+
+  {% comment %}
+  Template-specific js
+  {% endcomment %}
+  <script>
+    {% if resetPassword %}
+    $(function () {
+      timber.resetPasswordSuccess();
+    });
+    {% endif %}
+  </script>
+
+  {% comment %}
+  Ajaxify your cart with this plugin.
+  Documentation:
+  - http://shopify.com/timber#ajax-cart
+  {% endcomment %}
+  {% if settings.ajax_cart_method == "drawer" %}
+  {{ 'handlebars.min.js' | asset_url | script_tag }}
+  {% include 'ajax-cart-template' %}
+  {{ 'ajax-cart.js' | asset_url | script_tag }}
+  <script>
+    jQuery(function ($) {
+      ajaxCart.init({
+        formSelector: '#AddToCartForm',
+        cartContainer: '#CartContainer',
+        addToCartSelector: '#AddToCart',
+        cartCountSelector: '#CartCount',
+        cartCostSelector: '#CartCost',
+        moneyFormat: {{ shop.money_format | json }}
+        });
+      });
+
+    jQuery(document.body).on('afterCartLoad.ajaxCart', function (evt, cart) {
+      // Bind to 'afterCartLoad.ajaxCart' to run any javascript after the cart has loaded in the DOM
+      timber.RightDrawer.open();
+    });
+  </script>
+  {% endif %}
+
+  <script>
+    jQuery('#notify-me').click(function() {
+
+    jQuery('#notify-me-wrapper').fadeIn();
+
+    return false;
+    } );
+    if (Storage !== undefined) {
+
+      var defaultLink = "/collections/all";
+      
+      {% if template contains 'collection' %}
+      sessionStorage.collection = "{{ collection.url }}";
+      {% endif %}
+
+      {% if template contains 'cart' %}
+      if (!sessionStorage.collection) {
+        sessionStorage.collection = defaultLink;
+      }
+      document.getElementById("continue-shopping").href = sessionStorage.collection;
+      {% endif %}
+
+    }
+  </script>
+
+</body>
+
+</html>

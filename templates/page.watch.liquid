@@ -1,0 +1,174 @@
+<div class="Humanist521BT-Light center-section mx-auto px-0" style="overflow-x:hidden;">
+    <div class="row no-gutters h-100">
+        
+        <!-- <div class="col-md-9 col-xs-12" style="background-position-y: center; background-size: cover; background-image: url('https://icon4x4.com/files/large/f16b50d3ce3eb55d2fc1d29044fad5f3.jpg');"> -->
+        <div class="col-md-9 col-sm-12" style="height: 100%;background: #5e5f61;">
+            <a href="javascript&colon;history.go(-1)" class="back-btn m-2" style="border: 1px solid #ffffff; z-index: 9 !important; left:0px !important;"> BACK </a>
+            <input type="button" class="buy_button mt-md-3 mt-4" value="BUY NOW" style="position:absolute; right:15px;z-index:9999;">
+            <div style="position:relative;overflow:hidden;height: 100%;">
+
+            
+                <div id="carouselExampleControls" class="carousel slide h-100" data-ride="carousel">
+                    
+                    <div class="carousel-inner" style="height: 100%;">
+                        {% for image in all_products.['icon-watch'].images %}
+                        
+                            <div class="carousel-item carousel-item-watch-sec {% if forloop.first == true%} active  {% endif %} " >
+                                <a class="image-link" href="{{ image.src |  img_url: 'master' }}">
+                                    <!-- <div  style="width:100%; background-image: url('{{ image.src |  img_url: 'master' }}');">
+
+                                    </div> -->
+                                    <img style="object-fit:contain;" class="h-100 d-block w-100" src="{{ image.src |  img_url: 'master' }}" alt="slide">
+                                    <span class="text">Click On Image To Enlarge</span>
+                                </a>	
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true" style="height:40px !important; width:40px !important;"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true" style="height:40px !important; width:40px !important;"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+
+
+        <!-- <div class="col-md-9">
+         
+            <div id="slider" class="flexslider">
+                <ul class="slides">
+                    {% for image in all_products.['icon-watch'].images %}
+                        <li>
+                            <img class="img-fluid" src="{{ image.src |  img_url: 'master' }}" />
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div id="carousel" class="flexslider" style="height: 15%;">
+                <ul class="slides">
+                    {% for image in all_products.['icon-watch'].images %}
+                        <li>
+                            <img class="img-fluid" src="{{ image.src |  img_url: 'master' }}" />
+                        </li>
+                    {% endfor %}
+               </ul>
+            </div>
+        </div> -->
+
+        <div class="col-md-3 col-sm-12 h-100">
+           <div class="row h-100 d-flex flex-column">
+            <div id="sec-insp" class="cursor-pointer ml-2 h-50 d-flex justify-content-center align-items-center text-white font-weight-bold" style="    border-bottom: 3px solid #ffffff; background-size: cover; background-image: url('https://icon4x4.com/files/large/4cd8c26f377b29925c6f99cc46060b9b.jpg');">
+               <span class="content-b">INSPIRATION</span>
+            </div>
+            <div id="sec-spec" class="cursor-pointer ml-2 h-50 d-flex justify-content-center align-items-center text-white font-weight-bold" style="background-size: cover; background-image: url('https://icon4x4.com/files/large/4060ab8a20ec99b0cb8c48e2b8155f15.jpg');">
+                <span class="content-b">SPECIFICATIONS</span>
+            </div>
+           </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- <div class="row Humanist521BT-Light content-section center-section center-section">
+    <div id="content-wrapper">
+        <div id="content" class="col-md-9 col-xs-12 watches-content background" data-img-width="1534" data-img-height="950" style="background-image: url(&quot;https://icon4x4.com/files/large/f16b50d3ce3eb55d2fc1d29044fad5f3.jpg&quot;); background-size: 1025px 634.778px;">
+            <input type="button" class="buy_button" name="submit" value="BUY NOW" data-toggle="modal" data-target="#watch_buy" data-url="https://icon4x4.com/watch/serial">
+        </div>
+        <div class="sidebar-b col-md-3 col-xs-12">
+            <div class="box col-xs-12 background" style="background-image: url(&quot;https://icon4x4.com/files/large/4cd8c26f377b29925c6f99cc46060b9b.jpg&quot;); background-size: 347.286px 143px;" data-img-width="850" data-img-height="350">
+                <div class="overlay">
+                    <a href="https://icon4x4.com/watches/inspiration">
+                        <div class="border-white"></div>
+                        <div class="content-a">
+                            <div class="content-b">INSPIRATION</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="box col-xs-12 background" style="background-image: url(&quot;https://icon4x4.com/files/large/b394c5bf26f3a17a9a12641713f988b7.jpg&quot;); background-size: 347.286px 143px;" data-img-width="850" data-img-height="350">
+                <div class="overlay">
+                    <a href="https://icon4x4.com/watches/gallery">
+                        <div class="border-white"></div>
+                        <div class="content-a">
+                            <div class="content-b">GALLERY</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="box col-xs-12 background" style="background-image: url(&quot;https://icon4x4.com/files/large/4060ab8a20ec99b0cb8c48e2b8155f15.jpg&quot;); background-size: 347.286px 143px;" data-img-width="850" data-img-height="350">
+                <div class="overlay">
+                    <a href="https://icon4x4.com/watches/specifications">
+                        <div class="border-white"></div>
+                        <div class="content-a">
+                            <div class="content-b">SPECIFICATIONS</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flexslider/2.7.2/jquery.flexslider-min.js" integrity="sha512-BmoWLYENsSaAfQfHszJM7cLiy9Ml4I0n1YtBQKfx8PaYpZ3SoTXfj3YiDNn0GAdveOCNbK8WqQQYaSb0CMjTHQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flexslider/2.7.2/flexslider.min.css" integrity="sha512-c7jR/kCnu09ZrAKsWXsI/x9HCO9kkpHw4Ftqhofqs+I2hNxalK5RGwo/IAhW3iqCHIw55wBSSCFlm8JP0sw2Zw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js" integrity="sha512-IsNh5E3eYy3tr/JiX2Yx4vsCujtkhwl7SLqgnwLNgf04Hrt9BT9SXlLlZlWx+OK4ndzAoALhsMNcCmkggjZB1w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.css" integrity="sha512-WEQNv9d3+sqyHjrqUZobDhFARZDko2wpWdfcpv44lsypsSuMO0kHGd3MQ8rrsBn/Qa39VojphdU6CMkpJUmDVw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script>
+jQuery(document).ready(function() {
+   
+  // The slider being synced must be initialized first
+  jQuery('#carousel').flexslider({
+        animation: "slide",
+        controlNav: false,
+        animationLoop: false,
+        slideshow: false,
+        itemWidth: 210,
+        itemMargin: 5,
+        asNavFor: '#slider'
+    });
+    
+    jQuery('#slider').flexslider({
+        animation: "slide",
+        controlNav: false,
+        animationLoop: false,
+        slideshow: false,
+        sync: "#carousel"
+    });
+    
+    jQuery('.image-link').magnificPopup({
+        type:'image',
+        gallery: {
+        // options for gallery
+        enabled: true
+        },
+        retina: {
+        ratio: 1, // Increase this number to enable retina image support.
+        // Image in popup will be scaled down by this number.
+        // Option can also be a function which should return a number (in case you support multiple ratios). For example:
+        // ratio: function() { return window.devicePixelRatio === 1.5 ? 1.5 : 2  }
+
+
+        replaceSrc: function(item, ratio) {
+            return item.src.replace(/\.\w+$/, function(m) { return '@2x' + m; });
+        } // function that changes image source
+        }
+    });
+});
+
+    jQuery('#sec-insp').click(function(){
+        window.open("/pages/watch-inspiration","_self");
+    });
+    jQuery('#sec-spec').click(function(){
+        window.open("/pages/watch-specifications","_self");
+    });
+    jQuery('.buy_button').click(function(){
+        window.open('/products/icon-watch',"_self");
+    });
+</script>

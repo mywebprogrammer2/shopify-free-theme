@@ -1,0 +1,557 @@
+/* Jonathan Snook - MIT License - https://github.com/snookca/prepareTransition */
+(function (a) { a.fn.prepareTransition = function () { return this.each(function () { var b = a(this); b.one("TransitionEnd webkitTransitionEnd transitionend oTransitionEnd", function () { b.removeClass("is-transitioning") }); var c = ["transition-duration", "-moz-transition-duration", "-webkit-transition-duration", "-o-transition-duration"]; var d = 0; a.each(c, function (a, c) { d = parseFloat(b.css(c)) || d }); if (d != 0) { b.addClass("is-transitioning"); b[0].offsetWidth } }) } })(jQuery);
+
+/* replaceUrlParam - http://stackoverflow.com/questions/7171099/how-to-replace-url-parameter-with-javascript-jquery */
+function replaceUrlParam(e, r, a) { var n = new RegExp("(" + r + "=).*?(&|$)"), c = e; return c = e.search(n) >= 0 ? e.replace(n, "$1" + a + "$2") : c + (c.indexOf("?") > 0 ? "&" : "?") + r + "=" + a };
+
+/*============================================================================
+  Money Format
+  - Shopify.format money is defined in option_selection.js.
+    If that file is not included, it is redefined here.
+==============================================================================*/
+if ((typeof Shopify) === 'undefined') { Shopify = {}; }
+if (!Shopify.formatMoney) {
+  Shopify.formatMoney = function (cents, format) {
+    var value = '',
+      placeholderRegex = /\{\{\s*(\w+)\s*\}\}/,
+      formatString = (format || this.money_format);
+
+    if (typeof cents == 'string') {
+      cents = cents.replace('.', '');
+    }
+
+    function defaultOption(opt, def) {
+      return (typeof opt == 'undefined' ? def : opt);
+    }
+
+    function formatWithDelimiters(number, precision, thousands, decimal) {
+      precision = defaultOption(precision, 2);
+      thousands = defaultOption(thousands, ',');
+      decimal = defaultOption(decimal, '.');
+
+      if (isNaN(number) || number == null) {
+        return 0;
+      }
+
+      number = (number / 100.0).toFixed(precision);
+
+      var parts = number.split('.'),
+        dollars = parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1' + thousands),
+        cents = parts[1] ? (decimal + parts[1]) : '';
+
+      return dollars + cents;
+    }
+
+    switch (formatString.match(placeholderRegex)[1]) {
+      case 'amount':
+        value = formatWithDelimiters(cents, 2);
+        break;
+      case 'amount_no_decimals':
+        value = formatWithDelimiters(cents, 0);
+        break;
+      case 'amount_with_comma_separator':
+        value = formatWithDelimiters(cents, 2, '.', ',');
+        break;
+      case 'amount_no_decimals_with_comma_separator':
+        value = formatWithDelimiters(cents, 0, '.', ',');
+        break;
+    }
+
+    return formatString.replace(placeholderRegex, value);
+  };
+}
+
+// Timber functions
+window.timber = window.timber || {};
+
+timber.cacheSelectors = function () {
+  timber.cache = {
+    // General
+    $html: $('html'),
+    $body: $(document.body),
+
+    // Navigation
+    $navigation: $('#AccessibleNav'),
+    $mobileSubNavToggle: $('.mobile-nav__toggle'),
+
+    // Collection Pages
+    $changeView: $('.change-view'),
+
+    // Product Page
+    $productImage: $('#ProductPhotoImg'),
+    $thumbImages: $('#ProductThumbs').find('a.product-single__thumbnail'),
+
+    // Customer Pages
+    $recoverPasswordLink: $('#RecoverPassword'),
+    $hideRecoverPasswordLink: $('#HideRecoverPasswordLink'),
+    $recoverPasswordForm: $('#RecoverPasswordForm'),
+    $customerLoginForm: $('#CustomerLoginForm'),
+    $passwordResetSuccess: $('#ResetSuccess')
+  };
+};
+
+timber.init = function () {
+  FastClick.attach(document.body);
+  timber.cacheSelectors();
+  timber.accessibleNav();
+  timber.drawersInit();
+  timber.mobileNavToggle();
+  timber.productImageSwitch();
+  timber.responsiveVideos();
+  timber.collectionViews();
+  timber.loginForms();
+};
+
+timber.accessibleNav = function () {
+  var $nav = timber.cache.$navigation,
+    $allLinks = $nav.find('a'),
+    $topLevel = $nav.children('li').find('a'),
+    $parents = $nav.find('.site-nav--has-dropdown'),
+    $subMenuLinks = $nav.find('.site-nav__dropdown').find('a'),
+    activeClass = 'nav-hover',
+    focusClass = 'nav-focus';
+
+  // Mouseenter
+  $parents.on('mouseenter touchstart', function (evt) {
+    var $el = $(this);
+
+    if (!$el.hasClass(activeClass)) {
+      evt.preventDefault();
+    }
+
+    showDropdown($el);
+  });
+
+  // Mouseout
+  $parents.on('mouseleave', function () {
+    hideDropdown($(this));
+  });
+
+  $subMenuLinks.on('touchstart', function (evt) {
+    // Prevent touchstart on body from firing instead of link
+    evt.stopImmediatePropagation();
+  });
+
+  $allLinks.focus(function () {
+    handleFocus($(this));
+  });
+
+  $allLinks.blur(function () {
+    removeFocus($topLevel);
+  });
+
+  // accessibleNav private methods
+  function handleFocus($el) {
+    var $subMenu = $el.next('ul'),
+      hasSubMenu = $subMenu.hasClass('sub-nav') ? true : false,
+      isSubItem = $('.site-nav__dropdown').has($el).length,
+      $newFocus = null;
+
+    // Add focus class for top level items, or keep menu shown
+    if (!isSubItem) {
+      removeFocus($topLevel);
+      addFocus($el);
+    } else {
+      $newFocus = $el.closest('.site-nav--has-dropdown').find('a');
+      addFocus($newFocus);
+    }
+  }
+
+  function showDropdown($el) {
+    $el.addClass(activeClass);
+
+    setTimeout(function () {
+      timber.cache.$body.on('touchstart', function () {
+        hideDropdown($el);
+      });
+    }, 250);
+  }
+
+  function hideDropdown($el) {
+    $el.removeClass(activeClass);
+    timber.cache.$body.off('touchstart');
+  }
+
+  function addFocus($el) {
+    $el.addClass(focusClass);
+  }
+
+  function removeFocus($el) {
+    $el.removeClass(focusClass);
+  }
+};
+
+timber.drawersInit = function () {
+  timber.LeftDrawer = new timber.Drawers('NavDrawer', 'left');
+  {% if settings.ajax_cart_method == "drawer" %}
+  timber.RightDrawer = new timber.Drawers('CartDrawer', 'right', {
+    'onDrawerOpen': ajaxCart.load
+  });
+  {% endif %}
+};
+
+timber.mobileNavToggle = function () {
+  timber.cache.$mobileSubNavToggle.on('click', function () {
+    $(this).parent().toggleClass('mobile-nav--expanded');
+  });
+};
+
+timber.getHash = function () {
+  return window.location.hash;
+};
+
+timber.productPage = function (options) {
+  var moneyFormat = options.money_format,
+    variant = options.variant,
+    selector = options.selector;
+
+  // Selectors
+  var $productImage = $('#ProductPhotoImg'),
+    $addToCart = $('#AddToCart'),
+    $productPrice = $('#ProductPrice'),
+    $comparePrice = $('#ComparePrice'),
+    $quantityElements = $('.quantity-selector, label + .js-qty'),
+    $addToCartText = $('#AddToCartText');
+
+  if (variant) {
+
+    // Update variant image, if one is set
+    if (variant.featured_image) {
+      var newImg = variant.featured_image,
+        el = $productImage[0];
+      Shopify.Image.switchImage(newImg, el, timber.switchImage);
+    }
+
+    // Select a valid variant if available
+    if (variant.available) {
+      // Available, enable the submit button, change text, show quantity elements
+      $addToCart.removeClass('disabled').prop('disabled', false);
+      $addToCartText.html({{ 'products.product.add_to_cart' | t | json }});
+    $quantityElements.show();
+  } else {
+    // Sold out, disable the submit button, change text, hide quantity elements
+    $addToCart.addClass('disabled').prop('disabled', true);
+    $addToCartText.html({{ 'products.product.sold_out' | t | json }});
+  $quantityElements.hide();
+}
+
+// Regardless of stock, update the product price
+$productPrice.html(Shopify.formatMoney(variant.price, moneyFormat));
+
+// Also update and show the product's compare price if necessary
+if (variant.compare_at_price > variant.price) {
+  $comparePrice
+    .html({{ 'products.product.compare_at' | t | json }} + ' ' + Shopify.formatMoney(variant.compare_at_price, moneyFormat))
+        .show();
+    } else {
+  $comparePrice.hide();
+}
+
+  } else {
+  // The variant doesn't exist, disable submit button.
+  // This may be an error or notice that a specific variant is not available.
+  // To only show available variants, implement linked product options:
+  //   - http://docs.shopify.com/manual/configuration/store-customization/advanced-navigation/linked-product-options
+  $addToCart.addClass('disabled').prop('disabled', true);
+  $addToCartText.html({{ 'products.product.unavailable' | t | json }});
+$quantityElements.hide();
+  }
+};
+
+timber.productImageSwitch = function () {
+  if (timber.cache.$thumbImages.length) {
+    // Switch the main image with one of the thumbnails
+    // Note: this does not change the variant selected, just the image
+    timber.cache.$thumbImages.on('click', function (evt) {
+      evt.preventDefault();
+      var newImage = $(this).attr('href');
+      timber.switchImage(newImage, null, timber.cache.$productImage);
+    });
+  }
+};
+
+timber.switchImage = function (src, imgObject, el) {
+  // Make sure element is a jquery object
+  var $el = $(el);
+  $el.attr('src', src);
+};
+
+timber.responsiveVideos = function () {
+  var $iframeVideo = $('iframe[src*="youtube.com/embed"], iframe[src*="player.vimeo"]');
+  var $iframeReset = $iframeVideo.add('iframe#admin_bar_iframe');
+
+  $iframeVideo.each(function () {
+    // Add wrapper to make video responsive
+    $(this).wrap('<div class="video-wrapper"></div>');
+  });
+
+  $iframeReset.each(function () {
+    // Re-set the src attribute on each iframe after page load
+    // for Chrome's "incorrect iFrame content on 'back'" bug.
+    // https://code.google.com/p/chromium/issues/detail?id=395791
+    // Need to specifically target video and admin bar
+    this.src = this.src;
+  });
+};
+
+timber.collectionViews = function () {
+  if (timber.cache.$changeView.length) {
+    timber.cache.$changeView.on('click', function () {
+      var view = $(this).data('view'),
+        url = document.URL,
+        hasParams = url.indexOf('?') > -1;
+
+      if (hasParams) {
+        window.location = replaceUrlParam(url, 'view', view);
+      } else {
+        window.location = url + '?view=' + view;
+      }
+    });
+  }
+};
+
+timber.loginForms = function () {
+  function showRecoverPasswordForm() {
+    timber.cache.$recoverPasswordForm.show();
+    timber.cache.$customerLoginForm.hide();
+  }
+
+  function hideRecoverPasswordForm() {
+    timber.cache.$recoverPasswordForm.hide();
+    timber.cache.$customerLoginForm.show();
+  }
+
+  timber.cache.$recoverPasswordLink.on('click', function (evt) {
+    evt.preventDefault();
+    showRecoverPasswordForm();
+  });
+
+  timber.cache.$hideRecoverPasswordLink.on('click', function (evt) {
+    evt.preventDefault();
+    hideRecoverPasswordForm();
+  });
+
+  // Allow deep linking to recover password form
+  if (timber.getHash() == '#recover') {
+    showRecoverPasswordForm();
+  }
+};
+
+timber.resetPasswordSuccess = function () {
+  timber.cache.$passwordResetSuccess.show();
+};
+
+/*============================================================================
+  Drawer modules
+  - Docs http://shopify.github.io/Timber/#drawers
+==============================================================================*/
+timber.Drawers = (function () {
+  var Drawer = function (id, position, options) {
+    var defaults = {
+      close: '.js-drawer-close',
+      open: '.js-drawer-open-' + position,
+      openClass: 'js-drawer-open',
+      dirOpenClass: 'js-drawer-open-' + position
+    };
+
+    this.$nodes = {
+      parent: $('body, html'),
+      page: $('#PageContainer'),
+      moved: $('.is-moved-by-drawer')
+    };
+
+    this.config = $.extend(defaults, options);
+    this.position = position;
+
+    this.$drawer = $('#' + id);
+
+    if (!this.$drawer.length) {
+      return false;
+    }
+
+    this.drawerIsOpen = false;
+    this.init();
+  };
+
+  Drawer.prototype.init = function () {
+    $(this.config.open).on('click', $.proxy(this.open, this));
+    this.$drawer.find(this.config.close).on('click', $.proxy(this.close, this));
+  };
+
+  Drawer.prototype.open = function (evt) {
+    // Keep track if drawer was opened from a click, or called by another function
+    var externalCall = false;
+
+    // Prevent following href if link is clicked
+    if (evt) {
+      evt.preventDefault();
+    } else {
+      externalCall = true;
+    }
+
+    // Without this, the drawer opens, the click event bubbles up to $nodes.page
+    // which closes the drawer.
+    if (evt && evt.stopPropagation) {
+      evt.stopPropagation();
+      // save the source of the click, we'll focus to this on close
+      this.$activeSource = $(evt.currentTarget);
+    }
+
+    if (this.drawerIsOpen && !externalCall) {
+      return this.close();
+    }
+
+    // Notify the drawer is going to open
+    timber.cache.$body.trigger('beforeDrawerOpen.timber', this);
+
+    // Add is-transitioning class to moved elements on open so drawer can have
+    // transition for close animation
+    this.$nodes.moved.addClass('is-transitioning');
+    this.$drawer.prepareTransition();
+
+    this.$nodes.parent.addClass(this.config.openClass + ' ' + this.config.dirOpenClass);
+    this.drawerIsOpen = true;
+
+    // Set focus on drawer
+    this.trapFocus(this.$drawer, 'drawer_focus');
+
+    // Run function when draw opens if set
+    if (this.config.onDrawerOpen && typeof (this.config.onDrawerOpen) == 'function') {
+      if (!externalCall) {
+        this.config.onDrawerOpen();
+      }
+    }
+
+    if (this.$activeSource && this.$activeSource.attr('aria-expanded')) {
+      this.$activeSource.attr('aria-expanded', 'true');
+    }
+
+    // Lock scrolling on mobile
+    this.$nodes.page.on('touchmove.drawer', function () {
+      return false;
+    });
+
+    this.$nodes.page.on('click.drawer', $.proxy(function () {
+      this.close();
+      return false;
+    }, this));
+
+    // Notify the drawer has opened
+    timber.cache.$body.trigger('afterDrawerOpen.timber', this);
+  };
+
+  Drawer.prototype.close = function () {
+    if (!this.drawerIsOpen) { // don't close a closed drawer
+      return;
+    }
+
+    // Notify the drawer is going to close
+    timber.cache.$body.trigger('beforeDrawerClose.timber', this);
+
+    // deselect any focused form elements
+    $(document.activeElement).trigger('blur');
+
+    // Ensure closing transition is applied to moved elements, like the nav
+    this.$nodes.moved.prepareTransition({ disableExisting: true });
+    this.$drawer.prepareTransition({ disableExisting: true });
+
+    this.$nodes.parent.removeClass(this.config.dirOpenClass + ' ' + this.config.openClass);
+
+    this.drawerIsOpen = false;
+
+    // Remove focus on drawer
+    this.removeTrapFocus(this.$drawer, 'drawer_focus');
+
+    this.$nodes.page.off('.drawer');
+
+    // Notify the drawer is closed now
+    timber.cache.$body.trigger('afterDrawerClose.timber', this);
+  };
+
+  Drawer.prototype.trapFocus = function ($container, eventNamespace) {
+    var eventName = eventNamespace ? 'focusin.' + eventNamespace : 'focusin';
+
+    $container.attr('tabindex', '-1');
+
+    $container.focus();
+
+    $(document).on(eventName, function (evt) {
+      if ($container[0] !== evt.target && !$container.has(evt.target).length) {
+        $container.focus();
+      }
+    });
+  };
+
+  Drawer.prototype.removeTrapFocus = function ($container, eventNamespace) {
+    var eventName = eventNamespace ? 'focusin.' + eventNamespace : 'focusin';
+
+    $container.removeAttr('tabindex');
+    $(document).off(eventName);
+  };
+
+  return Drawer;
+})();
+
+// Initialize Timber's JS on docready
+$(timber.init);
+
+$('.has_child').hover(function () {
+  $('.dd-li').stop(true, false).animate({
+    minHeight: "125px"
+  });
+
+  console.log('Mouse Hovered');
+}, function () {
+  $('.dd-li').stop(true, false).animate({
+    minHeight: "0"
+  });
+  console.log('Mouse out');
+});
+
+$('.has_models').hover(function () {
+  $('.dd-lt').stop(true, false).animate({
+    minHeight: "124px"
+  });
+
+  console.log('Mouse Hovered');
+}, function () {
+  $('.dd-lt').stop(true, false).animate({
+    minHeight: "0"
+  });
+  console.log('Mouse out');
+});
+// jQuery(document).ready(function () {
+//   jQuery('.field-items .field-item img ').attr('width', '200');
+//   jQuery('.field-items .field-item img ').removeAttr('height');
+//   jQuery("label[for='edit-qty']").closest("div").removeClass("form-item").addClass("input-group");
+//   // console.log(jQuery("label[for='edit-qty']").closest("div"));
+//   jQuery("label[for='edit-qty']").addClass("input-group-addon");
+//   jQuery("input#edit-qty").addClass("form-control");
+//   jQuery("input.node-add-to-cart").addClass("btn btn-default");
+// });
+
+$(document).ready(function () {
+  var sections = new theme.Sections();
+  sections.register('collections-list-template', theme.FeaturedCollections);
+  sections.register('collection-row-section', theme.CollectionRows);
+  sections.register('collection-template', theme.Collection);
+  sections.register('header-section', theme.HeaderSection);
+  sections.register('list-collections-template', theme.ListCollections);
+  sections.register('map-section', theme.Maps);
+  sections.register('product-template', theme.Product);
+  sections.register('slideshow-section', theme.SlideshowSection);
+});
+
+// <!-- !function(){function o(){var o=$("body").height();$(".content-b").each(function(n){$(this).innerHeight()<=o&&$(this).closest(".fullscreen").addClass("not-overflow")})}function n(){var o=$(window).height();$(".background").each(function(n){var e=$(this),t=e.width(),i=e.height(),a=e.attr("data-img-width"),l=e.attr("data-img-height"),r=a/l,s=parseFloat(e.attr("data-diff"));s=s||0;var u=0;e.hasClass("parallax")&&(u=o-i),t>(a=(l=i+u+s)*r)&&(l=(a=t)/r),e.data("resized-imgW",a),e.data("resized-imgH",l),e.css("background-size",a+"px "+l+"px")})}$(window).resize(o),o(),$(window).resize(n),$(window).focus(n),n(),$(".top-menu a").hover(function(){$(this).stop().animate({backgroundColor:"#5e5f61"},300)},function(){$(this).stop().animate({backgroundColor:"#f2f2f2"},300)}),$(".nav-tabs-br li").on("click",function(){$(".nav-tabs-br li a").each(function(){$(this).addClass("colorselection")})}),$("button.carousel-toggle").click(function(){var o=$(this);o.toggleClass("SeeMore2"),o.hasClass("SeeMore2")?($("#carousel ul.flex-direction-nav").show(),o.text("CLOSE")):(o.text("OPEN"),$("#carousel ul.flex-direction-nav").hide())});var t=$("ul.carousel-slides");$(".flex-direction-nav"),$("button.carousel-toggle").addClass("SeeMore2"),jQuery.fn.slideup=function(o,n,e){return $(this).slideToggle("500")},$("button.carousel-toggle").on("click",function(){t.slideToggle()}),$("ul.social-icons li a.facebook-icon").hover(function(){$(this).stop().animate({backgroundColor:"#3a589b"},300)},function(){$(this).stop().animate({backgroundColor:"#5e5f61"},300)}),$("ul.social-icons li a.twitter-icon").hover(function(){$(this).stop().animate({backgroundColor:"#55acee"},300)},function(){$(this).stop().animate({backgroundColor:"#5e5f61"},300)}),$("ul.social-icons li a.youtube-icon").hover(function(){$(this).stop().animate({backgroundColor:"#cf3427"},300)},function(){$(this).stop().animate({backgroundColor:"#5e5f61"},300)}),$("ul.social-icons li a.pinterest-icon").hover(function(){$(this).stop().animate({backgroundColor:"#ca2127"},300)},function(){$(this).stop().animate({backgroundColor:"#5e5f61"},300)}),$("ul.social-icons li a.share-icon").hover(function(){$(this).stop().animate({backgroundColor:"#38a849"},300)},function(){$(this).stop().animate({backgroundColor:"#5e5f61"},300)});var i=$("ul.dropdown-menu-container");$("ul.dropdown-menu-container-invent");jQuery.fn.flash=function(o,n,e){return $(this).slideToggle("normal")},jQuery.fn.highlight=function(o,n){var e=new RegExp(o,"gi");return console.log("this",this),this.each(function(){this.innerHTML=this.innerHTML.replace(e,function(o){return o+'<small class="'+n+'">&reg;</small>'})})},$(".dropdown-menu-container div.content-b").highlight("icon",""),$(".dropdown-menu-container li.icon-derelicts-nav .content-b").highlight("derelict",""),$(".dropdown-menu-container li.icon-reformers-nav .content-b").highlight("reformer","");var a=navigator.userAgent.toLowerCase().indexOf("iphone"),l=navigator.userAgent.toLowerCase().indexOf("ipad"),r=navigator.userAgent.toLowerCase().indexOf("ipod");(a>-1||l>-1||r>-1)&&($("a").mouseenter(function(o){var n=(o=$(this)).attr("href");console.log(o),console.log(o.closest("ul")),1!=o.closest("ul").hasClass("top-menu")?1!=o.hasClass("accordion-toggle")&&1!=o.hasClass("zoom")?window.location=n:1!=o.hasClass("text")&&o.click():18==o.closest("li").index("li")&&(e.preventDefault(),i.slideToggle("normal"))}),$("button").mouseenter(function(o){$(this).trigger("click")})),$("#bg-video").resize(),$(".overlay").hover(function(){$(this).stop().animate({backgroundColor:"rgba(0, 0, 0, 0)"},300)},function(){$(this).stop().animate({backgroundColor:"rgba(0, 0, 0, 0.6)"},300)}),$("#accordion").position({of:$(".sidebar-half").length>0?".sidebar-half":window,my:"center",at:"middle"}),$("#carousel-testimonials").position({of:$(".sidebar-half").length>0?".sidebar-half":window,my:"top",at:"top"}),$(".accordion-toggle").on("click",function(){$("h4.panel-title").removeClass("accordin-hover-efect");var o=$(this).closest("h4");o.hasClass("accordin-hover-efect")?o.removeClass("accordin-hover-efect"):o.addClass("accordin-hover-efect")}),$(".ui-positioned-element").position({of:$(".ui-positioning-element").length>0?".ui-positioning-element":window,my:"bottom",at:"middle top"}),$(document).on("click touchstart","input[type='button'].buy_button",function(){null!=navigator.userAgent.match(/iPad/i)&&$("#watch_buy").modal("show");var o=$(this).data("url");$.get(o,function(o){$data=$.parseJSON(o),$("select[name='drop_os0']").html($data.options),$("input[name='os0']").val($("select[name='drop_os0']").val())})}),$("select[name='drop_os0']").change(function(){$("input[name='os0']").val($(this).val())}),$("body").on("change","input[name='radio_os0'][type='radio']",function(){$val=$(this).val(),$("input[name='hosted_button_id'][type='hidden']").val($(this).val()),"5224V9Z9NMK9W"==$(this).val()?$("tr#serial_label, tr#serial_select").show("fadeIn"):$("tr#serial_label, tr#serial_select").hide("fadeOut")}),$("input#buy_now_submit").click(function(o){o.preventDefault(),url=$(this).data("url"),data=$("form#watch_buy_form").serialize(),$(this).val("Wait..."),$.ajax({type:"POST",url:url,data:data,context:this,success:function(o){if($data=$.parseJSON(o),$("div#message").html($data.message),$data.error)$(this).val("BUY");else{var n;if("5224V9Z9NMK9W"!=$("input[name='hosted_button_id']").val())array=[],$('select[name="drop_os0"] option').each(function(){parseFloat($(this).val())&&array.push(parseFloat($(this).val()))}),n=Math.min.apply(Math,array),$("input[name='os0']").val(n);$("form#watch_buy_form").submit()}}},"html")});var s=$("ul.dropdown-menu-container"),u=$("ul.dropdown-menu-container-invent");function c(o){return $(o).is(":hover")}function d(o,n,e){setTimeout(function(){!1===c(o)&&!1===c(n)&&($("#iframe-overlay").hide(),!1,!1,s.slideUp(),u.slideUp())},e)}$("ul.top-menu li:eq(3), ul.top-menu li:eq(0)").hover(function(o){s.slideUp(),u.slideUp(),$("#iframe-overlay").hide(),!1,!1}),$("ul.top-menu li:eq(1) a, ul.dropdown-menu-container").hoverIntent(function(o){u.slideUp(),s.slideDown(),!0,$("#iframe-overlay").show()},function(o){d($("ul.top-menu li:eq(1) a")[0],$("ul.dropdown-menu-container")[0],30)}),$("ul.top-menu li:eq(2) a, ul.dropdown-menu-container-invent li").hoverIntent(function(o){$("#iframe-overlay").show(),u.slideDown(),s.slideUp(),!0,!0},function(o){d($("ul.top-menu li:eq(2) a")[0],$("ul.dropdown-menu-container-invent")[0],30)}),$("div.Humanist521BT-Light,.header").mousemove(function(o){d($("ul.top-menu li:eq(1) a")[0],$("ul.dropdown-menu-container")[0]),d($("ul.top-menu li:eq(2) a")[0],$("ul.dropdown-menu-container-invent")[0])});var h=$(window).scrollTop();const p=$("nav.row").offset().top-h+25,f=window.innerHeight/2,m=window.innerWidth;$("<div id='iframe-overlay'></div>").css({width:m,height:f,top:p+"px",position:"absolute","z-index":"99",display:"none"}).appendTo("body"),$("ul.top-menu li").css({"z-index":"999"}),$("ul.dropdown-menu-container-invent li").css({"z-index":"999",width:"50%"}),$("ul.dropdown-menu-container li").css({"z-index":"999"}),$("ul.dropdown-menu-container-invent").css({width:"50%",float:"right"}),$("#iframe-overlay").mousemove(function(o){d($("ul.top-menu li:eq(1) a")[0],$("ul.dropdown-menu-container")[0]),d($("ul.top-menu li:eq(2) a")[0],$("ul.dropdown-menu-container-invent")[0])}),$("ul.dropdown-menu-container-invent").css("right","0px"),$("#watch_buy").addClass("watch-popup"),$("ul.top-menu li:eq(1) a").on("click",function(o){o.preventDefault()}),$("ul.top-menu li:eq(2) a").on("click",function(o){o.preventDefault()})}(); -->
+$('.qtybox .btnqty').on('click', function(){
+  var qty = parseInt($(this).parent('.qtybox').find('.quantity-input').val());
+  if($(this).hasClass('qtyplus')) {
+    qty++;
+  }else {
+    if(qty > 1) {
+      qty--;
+    }
+  }
+  qty = (isNaN(qty))?1:qty;
+  $(this).parent('.qtybox').find('.quantity-input').val(qty);
+}); 

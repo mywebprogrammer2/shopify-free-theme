@@ -1,0 +1,193 @@
+<!-- /templates/cart.liquid -->
+{% if cart.item_count > 0 %}
+
+{% comment %}
+
+  For info on test orders:
+    - General http://docs.shopify.com/manual/your-store/orders/test-orders
+    - Shopify Payments - http://docs.shopify.com/manual/more/shopify-payments/testing-shopify-payments
+
+{% endcomment %}
+
+<div class="Humanist521BT-Light center-section py-2">
+  <div>
+    <form action="/cart" id="uc-cart-view-form" method="POST" novalidate>
+      <div>
+        <!-- <div class="uc-default-submit">
+          <input type="submit" id="edit-update" name="update-cart" value="Update cart"
+            class="form-submit">
+          </div> -->
+        <!-- <table class="sticky-header" style="position: fixed; top: 0px; left: 26.9688px; visibility: hidden;">
+          <thead style="">
+            <tr>
+              <th>Remove</th>
+              <th>Products</th>
+              <th></th>
+              <th><abbr title="Quantity">Qty</abbr></th>
+              <th>Total</th>
+            </tr>
+          </thead>
+        </table> -->
+        <table class="sticky-enabled tableheader-processed sticky-table">
+          <thead>
+            <tr>
+              <th style="width: 9%;">Remove</th>
+              <th style="width: 1%;">Products</th>
+              <th></th>
+              <th>Product Details</th>
+              <th style="width: 1%;"><abbr title="Quantity">Qty</abbr></th>
+              <th style="width: 1%;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in cart.items %}  
+            {% capture bgclass %} {% cycle '0', '1' %} {% endcapture %}
+
+
+
+              <tr class="{% cycle 'odd', 'even' %}">
+                <td class="remove" style="padding-top: 8px !important;">
+                  <!-- <a href="/cart/change?line={{ forloop.index }}&amp;quantity=0">
+                  <button class="remove-cart form-submit">Remove</button>
+                  </a> -->
+                  <a href="/cart/change?line={{ forloop.index }}&quantity=0" rel="{{ item.id }}">
+                   Remove 
+                  </a>
+
+                  <!-- <input type="submit" id="edit-items-0-remove" name="remove-0" value="Remove"
+                    class="form-submit remove-cart"> -->
+                </td>
+                <td class="image">
+                  <a href="{{ item.url | within: collections.all }}"><img typeof="foaf:Image"
+                      src="{{ item | img_url: 'medium' }}"
+                      width="50" height="40" alt="{{ item.title | escape }}"></a></td>
+                <td class="desc d-block">
+                  {%if item.url contains "wheel-caps" %}
+                  <a href="/products/icon®-new-school-wheels?variant=40139233755183">{{ item.product.title }}</a>
+                  {%else%}
+                  <a href="{{ item.url | within: collections.all }}">{{ item.product.title }}</a>
+                  {%endif%}
+                  <br>
+                  <!-- <span>{{ item.variant.title }}</span>   -->
+                  
+                  
+                </td>
+
+                <td class="prod_description">
+                  {% if item.variant.title != 'Default Title' %}
+                    {% for option_title in item.product.options %}
+                     {{ option_title }} : <strong>{{item.variant.options[forloop.index0] }}</strong> <br>
+                    {% endfor %}
+                  {%else%}
+                    -
+                  {%endif%}
+                  
+                </td>
+
+                <td class="qty">
+                  <div class="form-item form-type-uc-quantity form-item-items-0-qty" style="padding-right: 10px;">
+                    <!-- <label class="element-invisible" for="edit-items-0-qty">Quantity <span class="form-required"
+                        title="This field is required.">*</span></label> -->
+                      
+                        
+                    <input 
+                    type={%if {{item.variant.inventory_quantity }} > item.quantity and item.variant.inventory_management == 'shopify' %} number {%else%} text {%endif%} id="updates_{{ item.key }}" 
+                    name="updates[]" data-id="{{ item.key }}" 
+                    value="{{ item.quantity }}" 
+                    min="0" 
+                    {%if {{item.variant.inventory_quantity }} > item.quantity and item.variant.inventory_management == 'shopify' %} max="{{item.variant.inventory_quantity}}" onkeyup='if(this.value > "{{item.variant.inventory_quantity}}" ){ this.value = null; $("#modalOpen").trigger("click"); }' {%endif%}
+                    class="{% if item.product.handle == 'icon-watch' %}disabled-field{%endif%} form-text qty-text required px-1" style="width: 50px;" {% if item.product.handle == 'icon-watch' %} readonly {%endif%}>
+                  </div>
+                </td>
+                <td class="price px-0"><span class="uc-price" style="font-size: smaller;"><div class="pn-total-line-item" data-id="{{ item.key }}">{{ item.line_price | money }}</div></span></td>
+              </tr>
+              
+            {% endfor %}
+            <tr class="{% cycle 'odd', 'even' %}">
+              <td colspan="6" class="subtotal py-1" style="text-align: end; font-size: .875em;">
+                <span id="subtotal-title">Subtotal: </span> <span class="uc-price">{{ cart.total_price | money }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="form-actions form-wrapper mt-2" id="edit-actions">
+          
+          <!-- <a href="/pages/shop" id="continue-shopping" name="op"
+             class="form-submit remove-cart" style="float: left; width: 167px;">Continue Shopping</a> -->
+          <a href="/pages/shop" class="remove-cart form-submit text-decoration-none" style="float: left; width: 167px;">Continue Shop</a>
+          
+          
+            <input type="submit" id="checkout" name="checkout" value="Checkout" class="form-submit remove-cart"
+            style="float: right; width: 101px;">
+          
+            <input type="submit" id="update" name="update"
+          value="Update cart" class="form-submit remove-cart" style="float: right; width: 118px;">
+          <!-- {{ cart.items[0].variant.inventory_quantity }}
+          {{  cart.items[0].variant.inventory_management }} -->
+          
+          
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal -->
+<button style='display:none;' id="modalOpen" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+  Launch demo modal
+</button>
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white" style="background: #7d7f78;">
+        <h5 class="modal-title" id="exampleModalLabel">
+          <i class="fa fa-exclamation-triangle" aria-hidden="true" style="color: #ffffff;"></i> 
+          Limited Quantity Available!</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color:#ffffff !important;">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        The selected quantity exceeds quantity available in stock.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" style="background-color:#7d7f78 !important;" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% else %}
+  <div class="row center-section">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body cart">
+                <div class="col-sm-12 empty-cart-cls text-center"> <i class="fa fa-shopping-cart fa-10x" aria-hidden="true"></i>
+                    <h3><strong>Your Cart is Currently Empty!</strong></h3>
+                    <p class="text-muted">Before proceeding to checkout, you must add some products to your shopping cart.</p>
+                    <p class="text-muted">You will find a lot of interesting products on our "SHOP" page.</p>
+                    <a href="/pages/shop" class="btn btn-dark-custom m-2 text-decoration-none" data-abc="true" >Return To Shop</a>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+{% endif %}
+
+
+<script>
+  // jQuery('#update').click(function(){
+  //   event.preventDefault();
+  //   var myItems = {{ cart.items | json }} 
+  //   console.log('items: ',myItems);
+
+  //   for(i = 0; i< myItems.length; i++){
+
+  //     if(myItems[i].quantity > "{{ cart.items['"+i+"'].variant.inventory_quantity }}"){
+  //       alert('Added stock not available for '+ myItems[i].title + " please change the quantity.");
+  //     }
+  //   }
+   
+  // });
+</script>

@@ -1,0 +1,31 @@
+<!-- /templates/index.liquid -->
+{% comment %}
+
+This is the homepage of your site.
+
+More info on global variables (available on all templates):
+- http://docs.shopify.com/themes/liquid-variables/global
+{% endcomment %}
+
+<div class="row Humanist521BT-Light center-section mx-auto px-0">
+  <div id="content-wrapper">
+   <a href="javascript&colon;history.go(-1)" class="back-btn"> BACK </a>
+   {% for link in linklists['shop'].links %}
+    <div class="box-art box col-md-12 px-0 lg background border-bt-2" style="height:24% !important; background:  url({{ link.object.image.src | collection_img_url: 'original' }}) no-repeat center center; background-size: cover;"> 
+      {% if link.title == "The Watch" %}
+        <a href="/pages/watches">
+        {% else %}
+          <a href="/pages/{{ link.title | replace: ' ', '-' | downcase  }}">
+      {% endif %}
+
+        <div class="border-white">&nbsp;</div>
+        <div class="overlay" style="background-color: rgba(0, 0, 0, 0.6); margin-top: -24px !important;">
+          <div class="content-a">
+            <div class="content-b Humanist521BT-Light">{{ link.title }}</div>
+          </div>
+        </div>
+      </a>
+   </div>	
+  {% endfor %}
+  </div>
+</div>

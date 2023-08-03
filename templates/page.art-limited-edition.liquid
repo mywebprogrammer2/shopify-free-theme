@@ -1,0 +1,40 @@
+<!-- /templates/collection.liquid -->
+{% comment %}
+
+  For more information on collection tags:
+    - http://docs.shopify.com/themes/liquid-variables/collection
+
+{% endcomment %}
+
+<div class="Humanist521BT-Light center-section mx-auto px-0">
+  <a href="javascript&colon;history.go(-1)" class="back-btn"> BACK </a>
+  
+      {% for product in collections.limited-edition.products %}
+      <!-- {% for image in product.images limit:1 %}
+        {% assign product_image = image.src %}
+      {% endfor %} -->
+        <div class="px-0 collection-box col-md-3 col-xs-12  background" id="bkg_image" style="
+        float: left;
+        {% for image in product.images limit:1 %}
+          background-image: url('{{ image | img_url: '905x600' }}');
+        {% endfor %}
+         background-size: cover;
+         /* background-position: cover; */
+         " data-img-width="1600" data-img-height="1064" title="{{ product.title }}">
+          <div class="overlay" style="background-color: rgba(0, 0, 0, 0.6);">
+            <a href="{{ product.url }}">
+              <div class="border-white"></div>
+              <div class="content-a">
+                <div class="content-b text-uppercase">
+                  {{ product.title }}
+                </div>
+                <!-- <small> {{ product_image }} </small> -->
+              </div>
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    
+
+</div>
+ <!-- style ="background-image: url('{{ article.image | img_url: '905x600' }}')" -->

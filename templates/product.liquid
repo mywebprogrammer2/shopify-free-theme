@@ -1,0 +1,534 @@
+{% render 'preorder-now-collection-item', product: product %}
+        <!-- /templates/product.liquid -->
+{% comment %}
+
+Rich snippets (itemscope, itemtype, etc.) for products are a theme requirement,
+and allow search engines to easily understand what the content is.
+
+For more information on these Scheme.org tags, visit:
+- http://schema.org/docs/gs.html
+
+{% endcomment %}
+    {% assign current_variant = product.selected_or_first_available_variant %}
+
+
+<div class="row Humanist521BT-Light mx-auto center-section" style="overflow-x: hidden; overflow-y: scroll;">
+	
+  <div class="col-md-6">
+    
+    
+    <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+      <a href="javascript&colon;history.go(-1)" class="back-btn" style="z-index: 9 !important; left:0px !important;"> BACK </a>
+        <div class="carousel-inner">
+          {% for image in product.images %}
+           
+          	<div class="carousel-item {% if forloop.first == true%} active  {% endif %} ">
+            
+          	<a class="image-link" href="{{ image.src |  img_url: 'master' }}">
+              <img class="d-block w-100" src="{{ image.src |  img_url: 'master' }}" alt="slide">
+              <span class="text">Click On Image To Enlarge</span>
+            </a>	
+          	</div>
+          {% endfor %}
+        	 </div>
+
+          {%if product.images.size > 1%}
+            <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true" style="height:40px !important; width:40px !important;"></span>
+              <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true" style="height:40px !important; width:40px !important;"></span>
+              <span class="sr-only">Next</span>
+            </a>
+          {%endif%}
+      </div>
+  </div>
+    
+    {%comment%}
+    OLD Slider
+  <div class="col-md-6">
+
+    <!-- Place somewhere in the <body> of your page -->
+    <div id="slider" class="flexslider  caption">
+
+      <div class="flex-viewport shadow" style="overflow: hidden; position: relative;">
+        <ul class="slides" title="1937 Cord"
+          style="width: 400%; transition-duration: 0s; transform: translate3d(0px, 0px, 0px);">
+
+
+          {% for image in product.images %}
+          <li class="flex-active-slide" style="width: 683px; float: left; display: block;"><a href="#"
+              class="back-btn image"> BACK </a><a href="{{ image.src | | img_url: 'medium' }}" rel="lightbox[0]" class="lightbox-processed"><img
+                typeof="foaf:Image" src="{{ image.src | img_url: 'large' }}" width="1858" height="1238"
+                alt="{{ image.alt | escape }}" title="{{ image.alt | escape }}" draggable="false"><span
+                class="text">Click On Image To Enlarge</span></a></li>
+          {% endfor %}
+          <!-- items mirrored twice, total of 12 -->
+        </ul>
+      </div>
+      <ul class="flex-direction-nav">
+        <li><a class="flex-prev flex-disabled" href="#" tabindex="-1">Previous</a></li>
+        <li><a class="flex-next" href="#" tabindex="-1">Next</a></li>
+      </ul>
+    </div>
+  </div>
+{%endcomment%}
+
+  <div class="col-md-6 px-5 product-detail" style="line-height: 1.2; overflow-x: hidden;">
+
+    <div class="row">
+      <div class="col-12">
+        <a href="/cart" class="btn btn-dark-custom py-1 w-100"
+          style="font-size: 14px;"><strong>CHECKOUT</strong></a>
+      </div>
+    </div>
+
+    <h3 class="font-humanist mt-3" style="line-height: 1.1; font-size: 24px; ">
+      {{ product.title }}
+      
+      <div
+        class="product-info sell-price"><span class="uc-price-label">Price:</span>
+        <span class="uc-price">{{ product.price | money }}</span>
+      </div>
+    </h3>
+
+    {% unless product.available %}
+    <h5><span class="badge badge-light text-info">Out of Stock</span></h5>
+    {%comment%}  
+    <div id="sold-out">
+        {% form 'contact' %}
+          {% if form.posted_successfully? %}
+          <p class="accent-text"></p>
+          <div class="alert alert-success">
+            <strong>Thanks!</strong> We will notify you when this product becomes available!
+           </div>
+          {% else %}
+          <div class="alert alert-warning">
+            <strong><a id="notify-me" href="#">Click here</strong></a> to be notified by email when {{ product.title }} becomes available.
+          </div>
+          
+          {% endif %}
+          {% if form.errors %}
+          <div class="error feedback accent-text">
+            <p>Please provide a valid email address.</p>
+          </div>
+          {% endif %}
+          {% unless form.posted_successfully? %}
+          <div id="notify-me-wrapper" class="clearfix" style="display:none;">
+            {% if customer %}
+            <input type="hidden" name="contact[email]" value="{{ customer.email }}" />
+            <input type="hidden" name="contact[name]" value="{{ customer.name }}" />
+            <input type="hidden" name="contact[phone]" value="{{ customer.phone }}" />
+            
+            {% else %}
+            <div style="display:flex; flex-direction: column; align-items: center; padding-top:30px; padding-bottom:30px; padding-right:50px; padding-left:50px; background-color: #c5cbc8; box-shadow: 0px 3px 6px -2px; border: 1px solid #c5cbc8;">
+              <input required="required" type="email" name="contact[email]" placeholder="your@email.com" class="mb-3 w-100 styled-input{% if form.errors contains 'email' %} error{% endif %}" value="{{ contact.fields.email }}" />
+           
+              <input required="required" type="text" name="contact[name]" placeholder="Your Name" class="mb-3 w-100 styled-input{% if form.errors contains 'name' %} error{% endif %}" value="{{ contact.fields.name }}" />
+           
+              <input required="required" type="number" name="contact[phone]" placeholder="Your Number" class="mb-3 w-100 styled-input{% if form.errors contains 'phone' %} error{% endif %}" value="{{ contact.fields.phone }}" />
+            
+            {% endif %}
+            <input type="hidden" name="contact[body]" value="Please notify me when {{ product.title | escape }} becomes available." />
+            <input style="width:100%;" class="btn btn-dark-custom px-md-4 px-2 py-2" type="submit" value="Send" />
+             </div>
+          </div>
+          {% endunless %}
+        {% endform %}
+      </div>
+      {%endcomment%}
+{% endunless %}
+ 
+
+      <div class="mt-3">
+        {{ product.description }}
+      </div>
+
+
+    <div class="add-to-cart">
+      
+      <div class="row">
+        <div class="col-12 text-center">
+          
+          {% if product.available %}
+          <form action="/cart/add" method="post" id="AddToCartForm" accept-charset="UTF-8" enctype="multipart/form-data"
+            class="uc-out-stock-processed">
+          {% endif %}
+            <div class="text-left mt-4">
+              {%comment%}
+              {% if current_variant.inventory_quantity > 0 and current_variant.inventory_management == 'shopify' %}
+                <h6>In Stock: <span class="font-weight-bold">{{ current_variant.inventory_quantity }}</span></h6>
+              {% endif %}
+              {%endcomment%}
+              <label class="bold-light {% if product.options_with_values[0].name ==  'Title' %} d-none  {% endif %}">{{ product.options_with_values[0].name }}:</label>
+              <select name="id" value="{{product.id}}" class="mt-2 {% if product.options_with_values[0].name ==  'Title'%} d-none  {% endif %}">
+                {% for variant in product.variants %}
+                <!-- {% if variant.available %} -->
+                
+                {% comment %}
+                Note: if you use option_selection.js, your <select> tag will be overwritten, meaning what
+                  you have inside <option> will not reflect what you coded below.
+                    {% endcomment %}
+              
+              
+                  <option {% if variant==product.selected_or_first_available_variant %} selected="selected" {% endif %}
+                    data-sku="{{ variant.sku }}" value="{{ variant.id }}">{{ variant.title }} - {{ variant.price |
+                    money_with_currency }}</option>
+              
+                  <!-- {% else %} -->
+                  <option value="{{ variant.id }}">
+                    {{ variant.title }} - {{ 'products.product.sold_out' | t }}
+                  </option>
+                <!--  {% endif %} -->
+                  {% endfor %}
+              </select>
+
+              {% if product.title == all_products['icon®-new-school-wheels'].title %}
+              <div class="alert alert-warning">
+                <strong>Note:</strong> Caps quantity can be managed in the cart page.
+              </div>
+                <div class="row">
+                  <div class="col-md-12 d-flex align-items-center">
+                    <label class="bold-light mr-1">Wheel Caps:</label>
+                    <select id="caps">
+                      <option value="0" selected>No Caps</option>
+                      <option value="1">1 Caps - $154.00 USD</option>
+                      <option value="2">2 Caps - $308.00 USD</option>
+                      <option value="3">3 Caps - $462.00 USD</option>
+                      <option value="4">4 Caps - $616.00 USD</option>
+                    </select>
+                    
+                    <!-- <button id="addtocart" class="btn btn-dark-custom px-md-4 px-2 py-2">Add Caps</button> -->
+                  
+                  </div>
+                </div>
+              {%endif%}
+    
+              
+          
+              
+              <div class="form-type-uc-quantity form-item-qty input-group" style="width: 92%;">
+                
+                <div class="input-group mb-3">
+                   
+                  <!-- <label for="edit-qty" class="input-group-addon px-2"
+                  style="height: 38px; line-height: 38px;font-size:14px;margin-bottom: 0 !important; margin-top: 0px !important;background-color: #eeeeee;">Quantity
+                  <span class="form-required text-danger" title="This field is required.">*</span></label>
+                    <input type="text" class="form-control required" id="Quantity" name="quantity" value="1" size="5" maxlength="6">
+                    <div class="input-group-append">
+                      <input class="node-add-to-cart form-submit btn btn-default" name="op" style="font-size: 14px ; margin-top:1px;" type="submit" value="Add to cart">
+                    </div>
+                  </div> -->
+                 
+                  <div class="qtydiv">
+                    
+                    {% if product.handle  == 'icon-watch'%}
+                    <div class="qtybox float-sm-left py-1">
+                   
+                    {% else %}
+
+                    <div class="qtybox float-sm-left py-1">
+                      
+                      <label for="Quantity" class="quantity-selector float-sm-left pt-3 mr-1">Quantity: </label>
+                      <!-- <span class="btnqty qtyminus icon icon-minus"></span> -->
+                      <!-- <span><button id="btnminus" class="py-2 px-4">-</button></span> -->
+                      <!-- custom validation message -->
+                      <!-- oninvalid="this.setCustomValidity('Product(s) out of stock!')" oninput="this.setCustomValidity('')" -->
+
+                      {%comment%}{% if current_variant.inventory_quantity >= 1 and current_variant.inventory_management == 'shopify' %} max="{{ current_variant.inventory_quantity }}" {%endif%}{%endcomment%}
+                      <span id="btnminus" class="btn-pls-mns icon icon-minus"></span>
+                      <input type="number" id="quantity" name="quantity" value="1" class="quantity-selector quantity-input" readonly="">
+                      <span id="btnplus" class="btn-pls-mns icon icon-plus"></span>
+                      
+                      <!-- <span><button id="btnplus" class="py-2 px-4">+</button></span> -->
+                      <!-- <span class="btnqty qtyplus icon icon-plus"></span> -->
+                      
+                    {% endif %}
+                   
+                    
+
+                      {% if product.available %}
+                        {% if product.title == all_products['icon®-new-school-wheels'].title %}
+                            <!-- <input class="node-add-to-cart form-submit btn btn-default mt-2" name="op" style="font-size: 14px ; margin-top:1px;" type="submit" value="Add to cart"> -->
+                            <button id="addtocart" class="btn btn-dark-custom px-md-4 px-2 py-2" type="submit">Add To Cart</button>
+                        {%else%}
+                          <input id="addtocartNormal" class="node-add-to-cart form-submit btn btn-default mt-2" name="op" style="font-size: 14px ; margin-top:1px;" type="submit" value="Add to cart">
+                        {%endif%}
+                         
+                      {%else%}
+                        <button id="addtocart" class="btn btn-dark-custom px-md-4 px-2 py-2" type="submit" disabled>SOLD OUT</button>
+                      {%endif%}
+                        
+                      <div class="text-danger py-2 px-3" id="stockCheck"></div>
+                      
+                    </div>
+                  </div>
+    <!--             <label for="edit-qty" class="input-group-addon px-2"
+                  style="height: 34px; line-height: 34px;font-size:14px;margin-bottom: 0 !important; margin-top: 4px !important;background-color: #eeeeee;">Quantity
+                  <span class="form-required text-danger" title="This field is required.">*</span></label>
+                <input type="text" id="Quantity" name="quantity" value="1" size="5" maxlength="6"
+                  class="form-text required form-control" style="height: 34px;
+                            font-size: 14px;">
+                <input class="node-add-to-cart form-submit btn btn-default" type="submit" id="AddToCart" name="op"
+                  value="Add to cart"> -->
+                
+                
+                <!-- 
+                        <div class="uc-out-of-stock-instock" style="display: block;">In stock</div> -->
+              </div>
+              <!-- <input type="hidden" name="form_build_id" value="form-S9YZBeY-VzzEhsnWnYF1fTLVMYa4uBvn8fFHk1AMmEs">
+                        <input type="hidden" name="form_id" value="uc_product_add_to_cart_form_106"> -->
+              <div class="form-actions form-wrapper" id="edit-actions">
+                <div class="uc_out_of_stock_throbbing">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                <!-- <input
+                          class="node-add-to-cart form-submit btn btn-default" type="submit" id="edit-submit-106" name="op"
+                          value="Add to cart"> -->
+                <div class="uc_out_of_stock_html"></div>
+              </div>
+            </div>
+    
+    
+          {% if product.available %}
+            </form>
+          {% endif %}
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+
+
+ 
+
+  
+  <!-- Including Flexslider for Icon4x4 -->
+  <script type="text/javascript"
+    src="https://www.iconautoart.com/sites/shop.icon4x4.com/themes/icon_new_seven/js/jquery.flexslider.js?P"></script>
+  <script type="text/javascript">
+
+$(document).ready(function() {
+  
+  // Minus button
+  jQuery('#btnplus').click(function(){
+      event.preventDefault();
+      let alert =   '<div class="alert alert-warning">';
+          alert +=      '<strong>*NOTE:</strong> Only {{ current_variant.inventory_quantity }} Item(s) left in stock.';
+          alert += '</div>';
+      let qty = parseInt(jQuery('#quantity').val());
+      qty = qty + 1;
+      // stockCheck
+      // {% if current_variant.inventory_quantity >= 1 and current_variant.inventory_management == 'shopify' %} 
+      // max="{{ current_variant.inventory_quantity }}" 
+      
+      // {%endif%}
+      if(qty > "{{ current_variant.inventory_quantity }}" && "{{ current_variant.inventory_management }}" == 'shopify'){
+        console.log('Out of Stock');
+        $('#stockCheck').html(alert);
+        $('#addtocartNormal').prop('disabled', true);
+      }
+      $('#quantity').val(qty);
+      console.log('Quantity: ',qty);
+  });
+
+  // Plus button
+  jQuery('#btnminus').click(function(){
+      event.preventDefault();
+      let qty = parseInt(jQuery('#quantity').val());
+      if( qty > 1){
+        qty = qty - 1;
+      }
+
+      if(qty <= "{{ current_variant.inventory_quantity }}" && "{{ current_variant.inventory_management }}" == 'shopify'){
+        console.log('Back in stock');
+        $('#stockCheck').html("");
+        $('#addtocartNormal').prop('disabled', false);
+      }
+      // qty = qty - 1;
+      $('#quantity').val(qty);
+      console.log('Quantity: ',qty);
+  });
+
+  $('.image-link').magnificPopup({
+    type:'image',
+    gallery: {
+      // options for gallery
+      enabled: true
+    },
+    retina: {
+      ratio: 1, // Increase this number to enable retina image support.
+      // Image in popup will be scaled down by this number.
+      // Option can also be a function which should return a number (in case you support multiple ratios). For example:
+      // ratio: function() { return window.devicePixelRatio === 1.5 ? 1.5 : 2  }
+
+
+      replaceSrc: function(item, ratio) {
+        return item.src.replace(/\.\w+$/, function(m) { return '@2x' + m; });
+      } // function that changes image source
+    }
+  });
+});
+    // jQuery("checkout").on("click",function(){
+    // form.submit();
+
+    // });
+    // jQuery.validator.setDefaults({
+    // debug: true,
+    // success: "valid"
+    // });
+    // jQuery( "#myform" ).validate({
+    // submitHandler: function(form) {
+    // // do other things for a valid form
+    // form.submit();
+    // },
+    // errorPlacement: function(error, element) {
+    // if (element.attr("type") == "radio") {
+    // error.insertBefore(element.parent().parent());
+    // } else {
+    // error.insertAfter(element);	
+    // }
+    // }
+    // });
+    jQuery(function () {
+      var screenHeight = window.screen.height;
+      height_slider = parseFloat(screenHeight) * 0.585;
+      height_thumb = parseFloat(screenHeight) * 0.16;
+      jQuery('body .flexslider .slides div#div-scroll').css("height", height_slider + "px");
+      // alert(jQuery("ul.slides li img").length);
+      // jQuery("ul.slides li img").each(function(){
+      // // alert(this.id);
+      // var img = document.getElementById(this.id); 
+      // //or however you get a handle to the IMG
+      // var width = img.naturalWidth;
+      // var height = img.naturalHeight;
+      // // if(width > 675){
+      // // jQuery(this).css({"width": "100%","margin": "0"})
+      // // }
+      // // if(height <435){
+      // // var li_height = jQuery("li#li-"+this.id).height();//jQuery(this).parent();
+      // // var offset = (li_height - height) / 2;
+      // // jQuery(this).css('margin-top', offset + 'px');
+      // // }else{
+      // // // jQuery(this).css({ "position": "relative","left": "15%"});
+      // // }
+      // // alert(width);
+      // });
+      // jQuery('.slides li').each( function() {
+      // var height = jQuery(this).height();
+      // // alert(height);
+      // var imageHeight = jQuery(this).find('img').attr("id");
+      // var img = document.getElementById(imageHeight); 
+      // // alert(img.naturalHeight);
+
+      // var offset = (height - img.naturalHeight) / 2;
+      // // alert(offset);
+
+      // jQuery(this).find('img').css('margin-top', offset + 'px');
+
+      // });
+      // jQuery('#carousel img').css("height", height_thumb+"px");
+      // SyntaxHighlighter.all();
+    });
+    jQuery(window).load(function () {
+      jQuery('#carousel').flexslider({
+        animation: "slide",
+        controlNav: false,
+        animationLoop: false,
+        slideshow: false,
+        itemWidth: 210,
+        minItems: 2,
+        maxItems: 7,
+        itemMargin: 0
+        // asNavFor: '#slider'
+      });
+
+      jQuery('#slider').flexslider({
+        animation: "slide",
+        controlNav: false,
+        animationLoop: false,
+        slideshow: false,
+        smoothHeight: true,
+        // sync: "#carousel",
+        start: function (slider) {
+          jQuery('body').removeClass('loading');
+        }
+      });
+    });
+    jQuery("body .flexslider .slides .back-btn.video").attr("href", jQuery(".flexslider .slides").find(".image").attr("href"));
+  
+  jQuery('#addtocart').click(function(){
+    event.preventDefault();
+    let capsQty = $("#caps").val();
+    // console.log("Caps Quantity: ",capsQty);
+    jQuery.post('/cart/add.js', {
+                quantity: capsQty,
+                id: 40273806458927
+               
+                
+            }).done(function() {
+                console.log("second success");
+            })
+            .fail(function(err) {
+                if(err.statusText !== 'OK'){
+                    console.log("error", err);
+                }
+            })
+            .always(function() {
+              //  alert(capsQty +" Added to your Cart!");
+                console.log("finished");
+                $('#AddToCartForm').submit();
+                // location.reload();
+            });
+  });
+  </script>
+
+
+</div>
+
+
+
+{% comment %}
+To take advantage of a callback on the select dropdown, add option_selection.js
+and customize the JS in timber.productPage as needed.
+
+Currently, timber.productPage does the following:
+- Hides your <select> tag from above
+  - Breaks out the product variants into separate product options, if more than one exists
+  - Generates a <select> tag for each product option
+    - Enables/disables elements based on variant availability
+
+    Callback notes:
+    - Keep the callback available to the global scope (window.selectCallback) so that advanced
+    addons can override it.
+    * E.g. multiple currencies
+    http://docs.shopify.com/manual/configuration/store-customization/currencies-and-translations/currencies/how-to-toggle-between-two-currencies
+    {% endcomment %}
+    <!-- {{ 'option_selection.js' | shopify_asset_url | script_tag }}
+    <script>
+      var selectCallback = function (variant, selector) {
+        timber.productPage({
+          money_format: "{{ shop.money_format }}",
+          variant: variant,
+          selector: selector
+        });
+      };
+
+      jQuery(function ($) {
+        new Shopify.OptionSelectors('productSelect', {
+          product: {{ product | json }},
+        onVariantSelected: selectCallback,
+        enableHistoryState: true
+    });
+
+      // Add label if only one product option and it isn't 'Title'. Could be 'Size'.
+      {% if product.options.size == 1 and product.options.first != 'Title' %}
+      $('.selector-wrapper:eq(0)').prepend('<label for="productSelect-option-0">{{ product.options.first | escape }}</label>');
+      {% endif %}
+
+      // Hide selectors if we only have 1 variant and its title contains 'Default'.
+      {% if product.variants.size == 1 and product.variants.first.title contains 'Default' %}
+      $('.selector-wrapper').hide();
+      {% endif %}
+  });
+    </script> -->

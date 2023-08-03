@@ -1,0 +1,37 @@
+<!-- /templates/collection.list.liquid -->
+{% comment %}
+
+  By using a variation of the 'view all' parameter technique, you can create
+  a custom layout for any template by adding ?view=xxxx
+
+  In this example, you can have a list view of your collection page by going to
+  /collections/all?view=list
+
+  For more information on collection tags:
+    - http://docs.shopify.com/themes/liquid-variables/collection
+
+  For more information on the ?view parameter:
+    - http://docs.shopify.com/support/configuration/store-customization/can-i-show-more-than-50-products-on-my-homepage-can-i-add-a-view-all-function-to-my-collection-pages#add-view-all
+
+{% endcomment %}
+<div class="row Humanist521BT-Light center-section mx-auto px-0">
+  <div id="content-wrapper">
+    <a href="javascript&colon;history.go(-1)" class="back-btn"> BACK </a>
+    {% for link in linklists.arts-menu.links %}
+      <div class="box-art box col-md-12 px-0 lg background border-bt-2
+         {% if link.title contains 'Prints' %} icon-prints {% elsif link.title contains 'Limited' %} icon-limited-edition {% endif %}"  data-img-height="234" data-img-width="1400"
+        style="
+        background-size: 1366px 228.317px;
+          /* background-size: cover;*/"> 
+        <a href="{{ link.url }}">
+          <div class="border-white">&nbsp;</div>
+          <div class="overlay" style="background-color: rgba(0, 0, 0, 0.6); margin-top: -24px !important;">
+            <div class="content-a">
+              <div class="content-b Humanist521BT-Light">{{ link.title }}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+</div>

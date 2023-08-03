@@ -1,0 +1,21 @@
+<div class="Humanist521BT-Light center-section mx-auto px-0">
+  <a href="javascript&colon;history.go(-1)" class="back-btn"> BACK </a>
+    {% for collection in collections['parts'].products %}
+  		
+            <div class="px-0 collection-box col-md-3 col-xs-12  background" id="bkg_image" style="
+            float: left; background: url({{ collection.featured_image | collection_img_url: 'original' }}); background-size: cover;" data-img-width="1600" data-img-height="1064" title="{{ collection.title }}">
+              <div class="overlay" style="background-color: rgba(0, 0, 0, 0.6);">
+                <a href="/products/{{ collection.handle }}">
+                  <div class="border-white"></div>
+                  <div class="content-a">
+                    <div class="content-b text-uppercase">
+                      {{ collection.title }}
+                    </div>
+
+                  </div>
+                </a>
+              </div>
+            </div>
+  		
+    {% endfor %}
+</div>
